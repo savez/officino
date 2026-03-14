@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: officino-postgres-prod
+    environment:
+      POSTGRES_DB: officino
+      POSTGRES_USER: officino_user
+      POSTGRES_PASSWORD: officino_pass
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U officino_user -d officino']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: officino-backend-prod
+    ports:
+      - '3000:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ../uploads:/app/uploads
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOST: 0.0.0.0
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: officino
+      DB_USER: officino_user
+      DB_PASSWORD: officino_pass
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      LOG_LEVEL: warn
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: officino-frontend-prod
+    ports:
+      - '80:80'
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  pgdata:

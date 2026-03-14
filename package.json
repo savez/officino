@@ -1,0 +1,33 @@
+{
+  "name": "officino",
+  "version": "1.1.0",
+  "private": true,
+  "description": "Monorepo root - Officino",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/exec": "^7.1.0",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^12.0.6",
+    "conventional-changelog-conventionalcommits": "^9.3.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.0",
+    "semantic-release": "^25.0.3"
+  },
+  "lint-staged": {
+    "backend/src/**/*.js": [
+      "cd backend && pnpm eslint --fix",
+      "cd backend && pnpm prettier --write"
+    ],
+    "backend/tests/**/*.js": [
+      "cd backend && pnpm eslint --fix",
+      "cd backend && pnpm prettier --write"
+    ],
+    "frontend/src/**/*.{js,vue}": [
+      "cd frontend && pnpm eslint --fix",
+      "cd frontend && pnpm prettier --write"
+    ]
+  }
+}

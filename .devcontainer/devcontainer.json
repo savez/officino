@@ -1,0 +1,70 @@
+{
+  "name": "Officino Dev",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/officino",
+
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20",
+      "pnpmVersion": "latest"
+    },
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+
+  "forwardPorts": [5173, 3000, 5432, 8080],
+  "portsAttributes": {
+    "5173": { "label": "Frontend (Vite)", "onAutoForward": "notify" },
+    "3000": { "label": "Backend (Fastify)", "onAutoForward": "notify" },
+    "5432": { "label": "PostgreSQL", "onAutoForward": "silent" },
+    "8080": { "label": "Adminer", "onAutoForward": "notify" }
+  },
+
+  "postCreateCommand": "pnpm install && cd backend && rm -rf node_modules && pnpm install && cd ../frontend && rm -rf node_modules && pnpm install",
+  "postStartCommand": "cd backend && pnpm migrate && pnpm seed",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Vue.volar",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-azuretools.vscode-docker",
+        "cweijan.vscode-database-client2"
+      ],
+      "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "eslint.workingDirectories": ["backend", "frontend"],
+        "chat.promptFilesRecommendations": {
+          "speckit.constitution": true,
+          "speckit.specify": true,
+          "speckit.plan": true,
+          "speckit.tasks": true,
+          "speckit.implement": true
+        },
+        "chat.tools.terminal.autoApprove": {
+          ".specify/scripts/bash/": true,
+          ".specify/scripts/powershell/": true
+        }
+      }
+    }
+  },
+
+  "containerEnv": {
+    "NODE_ENV": "development",
+    "PORT": "3000",
+    "HOST": "0.0.0.0",
+    "DB_HOST": "postgres",
+    "DB_PORT": "5432",
+    "DB_NAME": "officino",
+    "DB_USER": "officino_user",
+    "DB_PASSWORD": "officino_pass",
+    "JWT_SECRET": "change-me-in-production-min-8-chars",
+    "JWT_EXPIRES_IN": "15m",
+    "JWT_REFRESH_EXPIRES_IN": "7d",
+    "CORS_ORIGIN": "http://localhost:5173",
+    "LOG_LEVEL": "info",
+    "VITE_API_BASE_URL": "/api"
+  }
+}

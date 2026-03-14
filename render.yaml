@@ -1,0 +1,50 @@
+services:
+  # ── Backend API ─────────────────────────────────────────────
+  - type: web
+    name: officino-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    rootDir: backend
+    buildCommand: pnpm install --frozen-lockfile
+    startCommand: npx knex migrate:latest && node src/seed-if-empty.js && node src/index.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_SSL
+        value: "true"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 15m
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 7d
+      - key: LOG_LEVEL
+        value: warn
+      - key: CORS_ORIGIN
+        sync: false # impostare nella Dashboard con URL del frontend
+      - key: DATABASE_URL
+        sync: false # connection string di Neon.tech, impostare nella Dashboard
+
+  # ── Frontend Static Site ────────────────────────────────────
+  - type: web
+    name: officino-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: pnpm install --frozen-lockfile && pnpm build
+    staticPublishPath: dist
+    headers:
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://<YOUR_BACKEND_URL>/api/*
+       - type: rewrite
+         source: /uploads/*
+         destination: https://<YOUR_BACKEND_URL>/uploads/*
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: /api

@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/base:debian
+    volumes:
+      - ..:/workspaces/officino:cached
+    command: sleep infinity
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: officino
+      POSTGRES_USER: officino_user
+      POSTGRES_PASSWORD: officino_pass
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../docker/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U officino_user -d officino']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  adminer:
+    image: adminer:4
+    depends_on:
+      - postgres
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+      ADMINER_DESIGN: dracula
+
+volumes:
+  pgdata:
