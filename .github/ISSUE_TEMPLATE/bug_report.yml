@@ -1,0 +1,91 @@
+name: 🐛 Segnalazione Bug
+description: Segnala un comportamento non corretto o un errore nell'applicazione
+title: "[Bug]: "
+labels: ["bug", "da-valutare"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Grazie per aver preso il tempo di segnalare un bug! Compila il modulo con più dettagli possibili per aiutarci a riprodurre e risolvere il problema.
+
+  - type: textarea
+    id: descrizione
+    attributes:
+      label: Descrizione del bug
+      description: Una descrizione chiara e concisa di cosa sta succedendo.
+      placeholder: "Es: Quando salvo un rapportino, la pagina si ricarica ma le ore non vengono salvate."
+    validations:
+      required: true
+
+  - type: textarea
+    id: passi-riproduzione
+    attributes:
+      label: Passi per riprodurre
+      description: Descrivi passo per passo come riprodurre il comportamento.
+      placeholder: |
+        1. Vai su '...'
+        2. Clicca su '...'
+        3. Inserisci '...'
+        4. Osserva l'errore
+    validations:
+      required: true
+
+  - type: textarea
+    id: comportamento-atteso
+    attributes:
+      label: Comportamento atteso
+      description: Descrivi cosa ti aspettavi che succedesse.
+    validations:
+      required: true
+
+  - type: textarea
+    id: comportamento-attuale
+    attributes:
+      label: Comportamento attuale
+      description: Descrivi cosa sta succedendo invece.
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot / Video
+      description: Se applicabile, aggiungi screenshot o video per aiutare a spiegare il problema.
+      placeholder: Trascina qui le immagini oppure incolla il link.
+
+  - type: dropdown
+    id: ambiente
+    attributes:
+      label: Ambiente
+      description: In quale ambiente si verifica il bug?
+      options:
+        - Sviluppo locale (pnpm dev)
+        - Docker (docker-compose)
+        - Produzione (Render / altro)
+    validations:
+      required: true
+
+  - type: input
+    id: versione-browser
+    attributes:
+      label: Browser e versione
+      placeholder: "Es: Chrome 123, Firefox 124, Safari 17"
+
+  - type: input
+    id: versione-nodejs
+    attributes:
+      label: Versione Node.js
+      placeholder: "Es: 20.11.0"
+
+  - type: textarea
+    id: log
+    attributes:
+      label: Log / Messaggi di errore
+      description: Incolla qui eventuali log rilevanti dalla console del browser o dal terminale.
+      render: shell
+
+  - type: textarea
+    id: contesto-aggiuntivo
+    attributes:
+      label: Contesto aggiuntivo
+      description: Aggiungi qualsiasi altra informazione utile riguardo al problema.

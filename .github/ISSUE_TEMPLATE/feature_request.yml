@@ -1,0 +1,68 @@
+name: 🚀 Richiesta Feature
+description: Proponi una nuova funzionalità o miglioramento per Officino
+title: "[Feature]: "
+labels: ["enhancement", "da-valutare"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Hai un'idea per migliorare Officino? Fantastico! Descrivi la tua proposta nel dettaglio.
+
+  - type: textarea
+    id: problema
+    attributes:
+      label: Il problema che vuoi risolvere
+      description: Descrivi chiaramente quale problema o esigenza ha spinto questa richiesta.
+      placeholder: "Es: Non riesco a esportare i rapportini di un singolo operaio senza scaricare tutto..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: soluzione-proposta
+    attributes:
+      label: Soluzione proposta
+      description: Descrivi come immagini questa funzionalità. Più dettagli fornisci, meglio è!
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternative
+    attributes:
+      label: Alternative considerate
+      description: Hai considerato approcci diversi? Descrivili brevemente.
+
+  - type: dropdown
+    id: priorita
+    attributes:
+      label: Priorità percepita
+      description: Quanto è importante questa funzionalità per il tuo utilizzo quotidiano?
+      options:
+        - Alta – blocca il mio flusso di lavoro
+        - Media – sarebbe molto utile
+        - Bassa – nice to have
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area dell'applicazione
+      description: A quale area dell'app si riferisce la richiesta?
+      options:
+        - Dashboard
+        - Rapportini
+        - Preventivi
+        - Catalogo prodotti
+        - Utenti / Ruoli
+        - Note di lavorazione
+        - API / Backend
+        - DevOps / Deploy
+        - Altro
+    validations:
+      required: true
+
+  - type: textarea
+    id: contesto-aggiuntivo
+    attributes:
+      label: Contesto aggiuntivo
+      description: Aggiungi screenshot, mockup, link o qualsiasi informazione che possa aiutare a capire la richiesta.

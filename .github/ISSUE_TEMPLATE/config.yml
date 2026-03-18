@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussioni della community
+    url: https://github.com/savez/officino/discussions
+    about: Hai una domanda, un suggerimento generico o vuoi confrontarti con altri utenti? Apri una discussione!
+  - name: 📖 Documentazione
+    url: https://github.com/savez/officino/blob/main/README.md
+    about: Consulta il README per istruzioni su installazione, configurazione e utilizzo.
