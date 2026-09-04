@@ -1,9 +1,12 @@
 # Officino
 
 <p align="center">
-  <img src="docs/banner.svg" alt="Officino — gestionale open source per officine meccaniche" width="100%" />
+  <a href="https://savez.github.io/officino/">
+    <img src="docs/banner.svg" alt="Officino — gestionale open source per officine meccaniche" width="100%" />
+  </a>
 </p>
 
+[![Pagina del progetto](https://img.shields.io/badge/pagina_del_progetto-savez.github.io%2Fofficino-14503c)](https://savez.github.io/officino/)
 [![CI](https://github.com/savez/officino/actions/workflows/ci.yml/badge.svg)](https://github.com/savez/officino/actions/workflows/ci.yml)
 [![Licenza: MIT](https://img.shields.io/badge/Licenza-MIT-yellow.svg)](LICENSE)
 [![Versione](https://img.shields.io/github/package-json/v/savez/officino)](package.json)
