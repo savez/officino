@@ -165,7 +165,7 @@ attivo. Il frontend usa Vitest con jsdom.
 > **Stato attuale, detto com'è:** la CI esegue il frontend per intero e, del
 > backend, lint e test unitari. I test di integrazione restano fuori perché sei
 > suite falliscono, per quattro motivi distinti e tutti preesistenti. Sono
-> elencati nella issue dei difetti noti, e sono il punto di partenza più utile
+> elencati nella [issue dei difetti noti](https://github.com/savez/officino/issues/7), e sono il punto di partenza più utile
 > per un primo contributo.
 
 ## Contribuire

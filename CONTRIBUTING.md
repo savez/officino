@@ -4,7 +4,7 @@ Grazie per l'interesse. Officino è un gestionale per officine meccaniche, ed è
 un progetto piccolo: le pull request e le issue sono benvenute, e le domande
 anche.
 
-Se cerchi un primo contributo, la issue dei **difetti noti** elenca problemi
+Se cerchi un primo contributo, la [issue dei difetti noti](https://github.com/savez/officino/issues/7) elenca problemi
 circoscritti e già diagnosticati.
 
 ## Ambiente di sviluppo
@@ -98,7 +98,7 @@ La CI gira su ogni pull request e deve essere verde. Esegue:
 
 I test di integrazione del backend **non girano in CI**: sei suite falliscono
 già oggi, per quattro cause distinte fra loro, tutte precedenti a qualunque
-contributo tuo. Sono descritte nella issue dei difetti noti. Se la tua PR ne
+contributo tuo. Sono descritte nella [issue dei difetti noti](https://github.com/savez/officino/issues/7). Se la tua PR ne
 sistema una, riportala dentro `ci.yml` nello stesso commit.
 
 Poi il maintainer ([@savez](https://github.com/savez)) revisiona. Può chiedere
