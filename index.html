@@ -1,0 +1,841 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Officino — gestionale open source per officine meccaniche</title>
+<meta name="description" content="Gestionale open source per officine meccaniche: rapportini per macchinario, note di lavorazione e misura del lavoro svolto.">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#14503c">
+<link rel="canonical" href="https://savez.github.io/officino/">
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Officino">
+<meta property="og:locale" content="it_IT">
+<meta property="og:title" content="Officino — gestionale open source per officine meccaniche">
+<meta property="og:description" content="Si registra il lavoro svolto, se ne misura il costo e se ne ricava un documento da consegnare al cliente.">
+<meta property="og:url" content="https://savez.github.io/officino/">
+<meta property="og:image" content="https://savez.github.io/officino/banner.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Officino — gestionale open source per officine meccaniche">
+<meta name="twitter:description" content="Si registra il lavoro svolto, se ne misura il costo e se ne ricava un documento da consegnare al cliente.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap">
+
+<style>
+/* ══════════════════════════════════════════════════════════════════════════
+   Token — gli stessi di frontend/src/stili/_token.scss, non una palette nuova.
+   I rapporti di contrasto lì sono MISURATI contro `carta` e riverificati da
+   frontend/tests/stili/token.test.js: qui si copiano i valori, non si stimano.
+
+   Regola che vale anche su questa pagina: ottone, abete e ardesia sono i colori
+   DEGLI STATI di un rapportino. Non si usano come decorazione. Il filetto da 8px
+   di ogni sezione porta `bordo`, neutro; le tre tinte di stato compaiono solo
+   dove significano davvero qualcosa.
+   ══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --carta:#f6f7f5;
+  --superficie:#ffffff;
+  --inchiostro:#16211c;
+  --tenue:#465349;
+  --bordo:#7e8b83;
+  --filo:#c4ccc6;
+  --abete:#14503c;
+  --ottone:#8a5209;
+  --ardesia:#3c4e60;
+  --allarme:#96190f;
+  --marchio:#f97316;
+
+  /* La coda del gradiente dell'eroe. Il banner arriva a #1c6b50, che però dà
+     4,35:1 al testo secondario: sotto la soglia. #1a6449 dà 4,79:1. Il banner
+     non ha testo corrente sull'angolo chiaro, questa pagina sì. */
+  --abete-coda:#1a6449;
+  /* Il grigio-verde chiaro con cui il banner scrive sul fondo abete. */
+  --testo-scuro:#c9d8cf;
+
+  --display:'Barlow Condensed','Arial Narrow',system-ui,sans-serif;
+  --testo:'Barlow',system-ui,-apple-system,sans-serif;
+  --dati:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+
+  --etichetta:0.72rem;
+  --meta:0.82rem;
+  --ore:2.4rem;
+
+  --colonna:1120px;
+  --raggio:0;              /* angoli vivi: una targhetta non li ha arrotondati */
+  --thread:8px;
+  --tocco:48px;
+  --tocco-primario:56px;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--carta);
+  color:var(--inchiostro);
+  font-family:var(--testo);
+  font-size:1.0625rem;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+img,svg{max-width:100%;display:block}
+a{color:inherit}
+
+/* Nessun raggio da nessuna parte, senza dover ricordarselo ogni volta. */
+button,input,table,th,td,pre,code,.placca,.bottone,.pastiglia{border-radius:var(--raggio)}
+
+::selection{background:var(--abete);color:#fff}
+
+:focus-visible{outline:2px solid var(--marchio);outline-offset:3px}
+.eroe :focus-visible,.sezione--scura :focus-visible,.piede :focus-visible{outline-color:#fff}
+
+.salta{
+  position:absolute;left:-9999px;top:0;z-index:40;
+  background:var(--superficie);color:var(--abete);
+  padding:.7rem 1.1rem;font-size:var(--meta);font-weight:600;text-decoration:none;
+}
+.salta:focus{left:.75rem;top:.75rem}
+
+/* ── Impianto ───────────────────────────────────────────────────────────── */
+.colonna{
+  width:100%;max-width:var(--colonna);margin:0 auto;
+  padding:0 clamp(1.25rem,5vw,2.75rem);
+}
+.sezione{padding:clamp(3.5rem,9vw,6.5rem) 0;scroll-margin-top:calc(var(--tocco-primario) + var(--thread))}
+.sezione--bianca{background:var(--superficie)}
+.sezione--scura{background:var(--abete);color:#fff}
+.sezione--scura .occhiello{color:var(--testo-scuro)}
+.sezione--scura .prosa{color:var(--testo-scuro)}
+
+/* ── Testata di sezione: il filetto da 8px, il dispositivo dell'app ─────── */
+.testata{
+  border-left:var(--thread) solid var(--bordo);
+  padding-left:clamp(1rem,3vw,1.75rem);
+  max-width:62ch;
+}
+.testata--allarme{border-left-color:var(--allarme)}
+.sezione--scura .testata{border-left-color:var(--testo-scuro)}
+
+.occhiello{
+  font-family:var(--testo);font-size:var(--etichetta);font-weight:600;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--tenue);
+  margin:0 0 .75rem;
+}
+h1,h2,h3{
+  font-family:var(--display);font-weight:700;
+  letter-spacing:.005em;margin:0;text-wrap:balance;
+}
+h2{font-size:clamp(1.85rem,4vw,2.7rem);line-height:1.08;max-width:22ch}
+h3{font-size:1.3rem;line-height:1.15;text-transform:uppercase;letter-spacing:.045em}
+.prosa{max-width:58ch;color:var(--tenue);margin:1.25rem 0 0}
+.prosa strong{color:var(--inchiostro);font-weight:600}
+.sezione--scura .prosa strong{color:#fff}
+.prosa a{color:var(--abete);font-weight:600;text-decoration-thickness:1px;text-underline-offset:.2em}
+.sezione--scura .prosa a{color:#fff}
+
+/* ── Filo di marchio + navigazione ──────────────────────────────────────── */
+.barra{position:sticky;top:0;z-index:20;background:var(--abete)}
+.filo{
+  height:var(--thread);background:var(--marchio);
+  transform:scaleX(0);transform-origin:left center;
+  animation:tira 900ms cubic-bezier(.22,1,.36,1) forwards;
+}
+@keyframes tira{to{transform:scaleX(1)}}
+
+.barra-dentro{
+  display:flex;align-items:center;justify-content:space-between;gap:1.5rem;
+  min-height:var(--tocco-primario);
+}
+.marchio{display:flex;align-items:center;gap:.6rem;text-decoration:none;color:#fff}
+.marchio-segno{width:26px;height:26px;flex:none}
+.marchio-nome{
+  font-family:var(--display);font-weight:700;font-size:1.25rem;
+  letter-spacing:.09em;text-transform:uppercase;
+}
+.barra-link{display:flex;align-items:center;gap:clamp(1rem,2.5vw,2rem);list-style:none;margin:0;padding:0}
+.barra-link a{
+  color:var(--testo-scuro);text-decoration:none;
+  font-size:var(--meta);font-weight:600;letter-spacing:.03em;
+  padding:.5rem 0;border-bottom:2px solid transparent;
+  transition:color 160ms ease,border-color 160ms ease;
+}
+.barra-link a:hover{color:#fff;border-bottom-color:var(--marchio)}
+.barra-link li:not(:last-child){display:none}
+@media (min-width:992px){.barra-link li:not(:last-child){display:block}}
+
+/* ── Bottoni ────────────────────────────────────────────────────────────── */
+.bottone{
+  display:inline-flex;align-items:center;justify-content:center;gap:.55rem;
+  min-height:var(--tocco);padding:0 1.4rem;
+  font-family:var(--testo);font-size:1rem;font-weight:600;letter-spacing:.02em;
+  text-decoration:none;cursor:pointer;border:1px solid transparent;
+  transition:background 160ms ease,color 160ms ease,border-color 160ms ease;
+}
+.bottone--pieno{background:#fff;color:var(--abete)}
+.bottone--pieno:hover{background:var(--testo-scuro)}
+.bottone--vuoto{background:transparent;color:#fff;border-color:rgba(255,255,255,.5)}
+.bottone--vuoto:hover{border-color:#fff;background:rgba(255,255,255,.08)}
+
+/* ── L'eroe: la targhetta È il soggetto ─────────────────────────────────── */
+.eroe{
+  position:relative;overflow:hidden;color:#fff;
+  background:linear-gradient(135deg,#0e3a2b 0%,#14503c 60%,var(--abete-coda) 100%);
+  padding:clamp(3rem,8vw,6rem) 0 clamp(3.5rem,9vw,7rem);
+}
+/* La griglia tecnica da 40px, la stessa di docs/banner.svg */
+.eroe::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(to right,rgba(255,255,255,.05) 1px,transparent 1px),
+    linear-gradient(to bottom,rgba(255,255,255,.05) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+.eroe-dentro{position:relative;display:grid;gap:clamp(2.5rem,6vw,4rem);align-items:start}
+@media (min-width:992px){
+  .eroe-dentro{grid-template-columns:1fr minmax(360px,26rem);gap:4.5rem;align-items:center}
+}
+.eroe h1{
+  font-size:clamp(2.5rem,6.6vw,4.6rem);line-height:1.02;
+  letter-spacing:-.005em;max-width:19ch;margin:0 0 1.25rem;
+}
+.eroe-sotto{
+  font-size:clamp(1.05rem,1.9vw,1.24rem);color:var(--testo-scuro);
+  max-width:52ch;margin:0 0 2.25rem;
+}
+.eroe-azioni{display:flex;flex-wrap:wrap;gap:.85rem}
+.eroe-nota{
+  margin:2rem 0 0;font-size:var(--meta);color:var(--testo-scuro);
+  display:flex;flex-wrap:wrap;gap:.4rem 1.25rem;
+}
+
+/* La placca: fondo bianco, filetto arancio in testa, angoli vivi. */
+.placca{
+  background:var(--superficie);color:var(--inchiostro);
+  border-top:4px solid var(--marchio);
+  box-shadow:0 26px 64px -24px rgba(0,0,0,.55);
+}
+.placca-testa{
+  display:flex;align-items:baseline;justify-content:space-between;gap:1rem;
+  padding:1.15rem 1.35rem .9rem;border-bottom:1px solid var(--filo);
+}
+.placca-tipo{
+  font-family:var(--display);font-weight:700;font-size:1.1rem;
+  letter-spacing:.11em;text-transform:uppercase;
+}
+.placca-num{font-family:var(--dati);font-size:var(--meta);color:var(--tenue);font-variant-numeric:tabular-nums}
+
+.placca-campi{padding:1.05rem 1.35rem;border-bottom:1px solid var(--filo)}
+.placca-campo+.placca-campo{margin-top:.85rem}
+.placca-campo dt{
+  font-size:var(--etichetta);font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--tenue);
+}
+.placca-campo dd{margin:.1rem 0 0;font-size:1.05rem;font-weight:500;line-height:1.3}
+
+.placca-righe{margin:0;padding:.4rem 0;list-style:none;border-bottom:1px solid var(--filo)}
+.placca-riga{
+  display:flex;align-items:baseline;justify-content:space-between;gap:1rem;
+  padding:.5rem 1.35rem;font-size:.97rem;
+  opacity:0;transform:translateY(6px);
+  animation:posa 480ms cubic-bezier(.22,1,.36,1) forwards;
+}
+.placca-riga:nth-child(1){animation-delay:340ms}
+.placca-riga:nth-child(2){animation-delay:460ms}
+.placca-riga:nth-child(3){animation-delay:580ms}
+@keyframes posa{to{opacity:1;transform:none}}
+.placca-riga span:last-child{
+  font-family:var(--display);font-weight:600;font-size:1.05rem;
+  font-variant-numeric:tabular-nums;color:var(--tenue);
+}
+
+.placca-piede{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1.1rem 1.35rem 1.25rem}
+.stato{display:flex;align-items:center;gap:.7rem}
+.stato-striscia{
+  width:var(--thread);height:34px;background:var(--ottone);flex:none;
+  transform:scaleY(0);transform-origin:center;
+  animation:cresci 520ms cubic-bezier(.22,1,.36,1) 700ms forwards;
+}
+@keyframes cresci{to{transform:scaleY(1)}}
+.stato-nome{
+  font-size:var(--etichetta);font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ottone);
+}
+.placca-ore{text-align:right;line-height:1}
+.placca-ore b{
+  display:block;font-family:var(--display);font-weight:700;font-size:var(--ore);
+  font-variant-numeric:tabular-nums;letter-spacing:-.01em;
+}
+.placca-ore small{
+  font-size:var(--etichetta);font-weight:600;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--tenue);
+}
+
+/* ── La derivazione dello stato: il dispositivo strutturale ─────────────── */
+.derivazione{margin:2.5rem 0 0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tabella{width:100%;min-width:34rem;border-collapse:collapse;text-align:left}
+.tabella caption{
+  caption-side:top;text-align:left;padding:0 0 .85rem;
+  font-size:var(--etichetta);font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--tenue);
+}
+.tabella th,.tabella td{padding:.72rem .9rem;border-bottom:1px solid var(--filo)}
+.tabella th{
+  font-family:var(--dati);font-size:var(--meta);font-weight:500;
+  color:var(--tenue);border-bottom:2px solid var(--bordo);white-space:nowrap;
+}
+.tabella td{font-family:var(--dati);font-size:.9rem;font-variant-numeric:tabular-nums}
+.tabella .vuoto{color:var(--bordo)}
+.tabella .esito{font-family:var(--testo);white-space:nowrap}
+.esito-dentro{display:inline-flex;align-items:center;gap:.65rem}
+.esito-striscia{width:var(--thread);height:22px;flex:none;background:var(--bordo);transition:background 420ms ease}
+.esito-nome{
+  font-size:var(--etichetta);font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--tenue);transition:color 420ms ease;
+}
+/* Le tre tinte arrivano solo quando la riga entra in vista: qui portano il
+   significato che hanno nell'app, non un colore d'arredo. */
+.derivazione.acceso tbody tr:nth-child(1) .esito-striscia{background:var(--ottone)}
+.derivazione.acceso tbody tr:nth-child(1) .esito-nome{color:var(--ottone)}
+.derivazione.acceso tbody tr:nth-child(2) .esito-striscia{background:var(--abete)}
+.derivazione.acceso tbody tr:nth-child(2) .esito-nome{color:var(--abete)}
+.derivazione.acceso tbody tr:nth-child(3) .esito-striscia{background:var(--ardesia)}
+.derivazione.acceso tbody tr:nth-child(3) .esito-nome{color:var(--ardesia)}
+.derivazione.acceso tbody tr:nth-child(2) .esito-striscia,
+.derivazione.acceso tbody tr:nth-child(2) .esito-nome{transition-delay:180ms}
+.derivazione.acceso tbody tr:nth-child(3) .esito-striscia,
+.derivazione.acceso tbody tr:nth-child(3) .esito-nome{transition-delay:360ms}
+
+.citazione{
+  margin:2.25rem 0 0;padding:0 0 0 clamp(1rem,3vw,1.75rem);
+  border-left:2px solid var(--filo);max-width:58ch;
+  color:var(--tenue);font-size:1.02rem;
+}
+.citazione p{margin:0}
+.citazione p+p{margin-top:.9rem}
+
+/* Gli identificatori (nomi di ruolo, variabili d'ambiente, file) stanno nella
+   faccia dati: sono codice, non prosa. */
+code{font-family:var(--dati);font-size:.875em;letter-spacing:0}
+.prosa code,.scheda code{
+  background:var(--carta);border:1px solid var(--filo);padding:.05em .35em;color:var(--inchiostro);
+}
+.avviso code{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.28);padding:.05em .35em;color:#fff}
+
+/* ── Cosa c'è: sei targhette ────────────────────────────────────────────── */
+.griglia{display:grid;gap:1.25rem;margin:2.75rem 0 0}
+@media (min-width:992px){.griglia{grid-template-columns:repeat(3,1fr);gap:1.5rem}}
+.scheda{
+  background:var(--superficie);border:1px solid var(--filo);
+  border-top:2px solid var(--bordo);padding:1.5rem 1.5rem 1.65rem;
+}
+.scheda h3{margin:0 0 .7rem}
+.scheda p{margin:0;color:var(--tenue);font-size:.97rem}
+
+/* ── Provalo ────────────────────────────────────────────────────────────── */
+.blocco{position:relative;margin:1.75rem 0 0;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.14)}
+.blocco-testa{
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:.6rem .75rem .6rem 1rem;border-bottom:1px solid rgba(255,255,255,.5);
+}
+.blocco-nome{
+  font-size:var(--etichetta);font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--testo-scuro);
+}
+.copia{
+  background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;
+  font-family:var(--testo);font-size:var(--etichetta);font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;padding:.42rem .8rem;cursor:pointer;
+  transition:border-color 160ms ease,background 160ms ease;
+}
+.copia:hover{border-color:#fff;background:rgba(255,255,255,.1)}
+.blocco pre{
+  margin:0;padding:1.1rem 1rem;overflow-x:auto;
+  font-family:var(--dati);font-size:.875rem;line-height:1.75;color:#fff;
+}
+.blocco .cmt{color:var(--testo-scuro)}
+
+.utenze{margin:2.5rem 0 0;overflow-x:auto}
+.utenze table{width:100%;min-width:26rem;border-collapse:collapse;text-align:left}
+.utenze th,.utenze td{padding:.68rem .9rem;border-bottom:1px solid rgba(255,255,255,.16)}
+.utenze th{
+  font-size:var(--etichetta);font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--testo-scuro);border-bottom:2px solid rgba(255,255,255,.5);
+}
+.utenze td{font-family:var(--dati);font-size:.88rem}
+.avviso{
+  margin:1.5rem 0 0;padding:1rem 1.15rem;max-width:58ch;
+  border-left:var(--thread) solid var(--marchio);background:rgba(0,0,0,.22);
+  font-size:.97rem;color:var(--testo-scuro);
+}
+.avviso strong{color:#fff}
+
+/* ── Com'è fatto ────────────────────────────────────────────────────────── */
+.pila{display:grid;gap:2rem;margin:2.75rem 0 0}
+@media (min-width:992px){.pila{grid-template-columns:repeat(3,1fr);gap:2.5rem}}
+.strato h3{margin:0 0 .85rem;padding-bottom:.7rem;border-bottom:2px solid var(--bordo)}
+.strato ul{margin:0;padding:0;list-style:none}
+.strato li{
+  padding:.42rem 0;border-bottom:1px solid var(--filo);
+  font-size:.97rem;display:flex;justify-content:space-between;gap:1rem;
+}
+.strato li span{color:var(--tenue);font-size:var(--meta);text-align:right}
+.pastiglie{display:flex;flex-wrap:wrap;gap:.6rem;margin:2.5rem 0 0}
+.pastiglia{
+  border:1px solid var(--bordo);padding:.4rem .8rem;
+  font-size:var(--etichetta);font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--tenue);
+}
+
+/* ── Piede ──────────────────────────────────────────────────────────────── */
+.piede{background:var(--abete);color:#fff;padding:clamp(2.5rem,6vw,3.5rem) 0}
+.piede-dentro{display:grid;gap:2rem}
+@media (min-width:992px){.piede-dentro{grid-template-columns:1fr auto;align-items:end}}
+.piede-nome{display:flex;align-items:center;gap:.6rem;margin:0 0 .9rem}
+.piede-tag{color:var(--testo-scuro);font-size:.97rem;margin:0;max-width:44ch}
+.piede-link{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;list-style:none;margin:0;padding:0}
+.piede-link a{
+  color:var(--testo-scuro);text-decoration:none;font-size:var(--meta);font-weight:600;
+  border-bottom:1px solid transparent;transition:color 160ms ease,border-color 160ms ease;
+}
+.piede-link a:hover{color:#fff;border-bottom-color:var(--marchio)}
+.piede-link--sotto{margin-top:1.25rem}
+.piede-firma{color:inherit;text-decoration:none;border-bottom:1px solid transparent}
+.piede-firma:hover{border-bottom-color:var(--marchio)}
+.piede-meta{
+  margin:1.5rem 0 0;font-family:var(--dati);font-size:var(--meta);
+  color:var(--testo-scuro);font-variant-numeric:tabular-nums;
+}
+@media (min-width:992px){.piede-meta{margin:0;text-align:right}}
+
+/* ── Il pavimento di qualità, senza annunciarlo ─────────────────────────── */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{
+    animation-duration:.01ms !important;animation-delay:0ms !important;
+    animation-iteration-count:1 !important;transition-duration:.01ms !important;
+    transition-delay:0ms !important;
+  }
+  .filo{transform:none}
+  .placca-riga{opacity:1;transform:none}
+  .stato-striscia{transform:none}
+}
+</style>
+</head>
+<body>
+
+<a class="salta" href="#alto">Salta al contenuto</a>
+
+<div class="barra">
+  <div class="filo" aria-hidden="true"></div>
+  <div class="colonna">
+    <nav class="barra-dentro" aria-label="Principale">
+      <a class="marchio" href="#alto">
+        <svg class="marchio-segno" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <rect width="24" height="24" fill="#f97316"/>
+          <path fill="#fff" d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/>
+        </svg>
+        <span class="marchio-nome">Officino</span>
+      </a>
+      <ul class="barra-link">
+        <li><a href="#come-funziona">Come funziona</a></li>
+        <li><a href="#cosa-ce">Cosa c'è</a></li>
+        <li><a href="#provalo">Provalo</a></li>
+        <li><a href="https://github.com/savez/officino">GitHub &#8599;</a></li>
+      </ul>
+    </nav>
+  </div>
+</div>
+
+<main id="alto">
+
+  <!-- ═══ L'eroe: non un titolo con un'immagine accanto, ma il rapportino ═══ -->
+  <header class="eroe">
+    <div class="colonna eroe-dentro">
+      <div>
+        <p class="occhiello">Gestionale open source &middot; Licenza MIT</p>
+        <h1>Il quaderno delle ore, che però fa i conti.</h1>
+        <p class="eroe-sotto">
+          Officino registra il lavoro svolto in officina, ne misura il costo e ne
+          ricava il documento da consegnare al cliente.
+        </p>
+        <div class="eroe-azioni">
+          <a class="bottone bottone--pieno" href="https://github.com/savez/officino">Vedi il codice su GitHub</a>
+          <a class="bottone bottone--vuoto" href="#provalo">Come si prova</a>
+        </div>
+        <p class="eroe-nota">
+          <span>Fastify e PostgreSQL</span>
+          <span>Vue 3</span>
+          <span>Docker pronto</span>
+          <span>Self-hosted</span>
+        </p>
+      </div>
+
+      <!-- La targhetta. È l'oggetto centrale del prodotto, non uno screenshot. -->
+      <article class="placca" aria-label="Esempio di rapportino">
+        <div class="placca-testa">
+          <span class="placca-tipo">Rapportino</span>
+          <span class="placca-num">n. 128 &middot; 04/03</span>
+        </div>
+        <dl class="placca-campi">
+          <div class="placca-campo"><dt>Cliente</dt><dd>Meccanica Vallese s.r.l.</dd></div>
+          <div class="placca-campo"><dt>Macchinario</dt><dd>Pressa idraulica PH&#8209;40</dd></div>
+          <div class="placca-campo"><dt>Operaio</dt><dd>M. Ferrari</dd></div>
+        </dl>
+        <ul class="placca-righe">
+          <li class="placca-riga"><span>Sostituzione guarnizioni</span><span>4,5</span></li>
+          <li class="placca-riga"><span>Taratura valvola di sfogo</span><span>3,0</span></li>
+          <li class="placca-riga"><span>Ripristino centralina</span><span>5,0</span></li>
+        </ul>
+        <div class="placca-piede">
+          <p class="stato">
+            <span class="stato-striscia" aria-hidden="true"></span>
+            <span class="stato-nome">Aperto</span>
+          </p>
+          <p class="placca-ore">
+            <b id="conta-ore">12,5</b>
+            <small>ore</small>
+          </p>
+        </div>
+      </article>
+    </div>
+  </header>
+
+  <!-- ═══ Come funziona ═══ -->
+  <section class="sezione" id="come-funziona">
+    <div class="colonna">
+      <div class="testata">
+        <p class="occhiello">Come funziona</p>
+        <h2>Un rapportino: un operaio, un macchinario, un cliente.</h2>
+      </div>
+      <p class="prosa">
+        Il pezzo centrale è il <strong>rapportino</strong>: un contenitore delle
+        lavorazioni che un operaio ha svolto su un solo macchinario per un solo
+        cliente. Dentro ci finiscono le singole lavorazioni, con le ore e i
+        materiali impiegati.
+      </p>
+
+      <div class="derivazione" id="derivazione">
+        <table class="tabella">
+          <caption>Lo stato non è memorizzato: si legge da due campi</caption>
+          <thead>
+            <tr>
+              <th scope="col">chiuso_il</th>
+              <th scope="col">nota_lavorazione_id</th>
+              <th scope="col">Stato che ne risulta</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="vuoto">&mdash;</td>
+              <td class="vuoto">&mdash;</td>
+              <td class="esito"><span class="esito-dentro"><span class="esito-striscia" aria-hidden="true"></span><span class="esito-nome">Aperto</span></span></td>
+            </tr>
+            <tr>
+              <td>2026-03-04</td>
+              <td class="vuoto">&mdash;</td>
+              <td class="esito"><span class="esito-dentro"><span class="esito-striscia" aria-hidden="true"></span><span class="esito-nome">Concluso</span></span></td>
+            </tr>
+            <tr>
+              <td>2026-03-04</td>
+              <td>412</td>
+              <td class="esito"><span class="esito-dentro"><span class="esito-striscia" aria-hidden="true"></span><span class="esito-nome">In nota di lavorazione</span></span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <blockquote class="citazione">
+        <p>
+          Una colonna scritta accanto a quei due campi rappresenterebbe due volte
+          lo stesso fatto, e basterebbe un endpoint che aggiorna l'una e non
+          l'altra per avere un rapportino gestito senza nota. Con la derivazione
+          la contraddizione non è rappresentabile.
+        </p>
+      </blockquote>
+
+      <p class="prosa">
+        I rapportini chiusi confluiscono in una <strong>nota di lavorazione</strong>,
+        il documento che va al cliente: raccoglie le lavorazioni di un periodo, ne
+        calcola i totali e produce un PDF. Prima di stampare, un controllo di
+        coerenza segnala le note che non tornano &mdash; righe con costo orario a
+        zero, materiali senza prezzo &mdash; e chiede conferma esplicita per procedere.
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══ Cosa c'è ═══ -->
+  <section class="sezione sezione--bianca" id="cosa-ce">
+    <div class="colonna">
+      <div class="testata">
+        <p class="occhiello">Cosa c'è</p>
+        <h2>Sei sezioni, e nient'altro da configurare.</h2>
+      </div>
+      <div class="griglia">
+        <article class="scheda">
+          <h3>Rapportini</h3>
+          <p>Ore per macchinario e cliente, materiali con prezzo unitario, costo orario per riga, filtri per periodo, avviso in caso di rapportino duplicato, PDF del singolo rapportino.</p>
+        </article>
+        <article class="scheda">
+          <h3>Note di lavorazione</h3>
+          <p>Costruite dai rapportini chiusi, con data di riferimento propria e riassunto composto dal server. Si correggono i costi, si uniscono o si dividono per macchinario, e il PDF distingue manodopera e materiali.</p>
+        </article>
+        <article class="scheda">
+          <h3>Dashboard</h3>
+          <p>Misura il lavoro svolto, non i preventivi. Metriche distinte per ruolo, ore per operaio e per cliente, pannello dei giorni con ore mancanti sotto le otto feriali. Il totale coincide sempre con l'elenco rapportini dello stesso periodo.</p>
+        </article>
+        <article class="scheda">
+          <h3>Preventivi</h3>
+          <p>Numerazione progressiva automatica, pezzi a catalogo e fuori catalogo, manodopera e sconto, ciclo bozza &rarr; approvato &rarr; fatturato, PDF con il logo dell'officina.</p>
+        </article>
+        <article class="scheda">
+          <h3>Catalogo prodotti</h3>
+          <p>Ricambi e materiali con categorie e ricerca, lettura di codici a barre EAN&#8209;13 e QR, export Excel. Alimenta preventivi e materiali dei rapportini, e accetta voci fuori catalogo inserite a mano.</p>
+        </article>
+        <article class="scheda">
+          <h3>Clienti e permessi</h3>
+          <p>Due ruoli, <code>user</code> e <code>admin</code>. Cinque sezioni sono riservate agli admin; dashboard, rapportini, preventivi e catalogo restano accessibili a tutti, e ogni operaio vede e modifica i propri rapportini.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Provalo ═══ -->
+  <section class="sezione sezione--scura" id="provalo">
+    <div class="colonna">
+      <div class="testata">
+        <p class="occhiello">Provalo</p>
+        <h2>In locale, in cinque minuti.</h2>
+      </div>
+      <p class="prosa">
+        Serve <strong>Node 20+</strong>, <strong>pnpm</strong> e
+        <strong>PostgreSQL 15+</strong>. Docker è comodo ma non obbligatorio.
+      </p>
+
+      <div class="blocco">
+        <div class="blocco-testa">
+          <span class="blocco-nome">Installazione</span>
+          <button class="copia" type="button" data-copia="cmd-1">Copia</button>
+        </div>
+<pre id="cmd-1">git clone https://github.com/savez/officino.git
+cd officino
+
+cp .env.example .env          <span class="cmt"># rivedere le credenziali del database</span>
+
+cd backend  &amp;&amp; pnpm install &amp;&amp; cd ..
+cd frontend &amp;&amp; pnpm install &amp;&amp; cd ..
+
+cd backend &amp;&amp; pnpm migrate &amp;&amp; pnpm seed &amp;&amp; cd ..</pre>
+      </div>
+
+      <div class="blocco">
+        <div class="blocco-testa">
+          <span class="blocco-nome">Avvio, in due terminali</span>
+          <button class="copia" type="button" data-copia="cmd-2">Copia</button>
+        </div>
+<pre id="cmd-2">make dev-backend              <span class="cmt"># API su :3000</span>
+make dev-frontend             <span class="cmt"># interfaccia su :5173</span></pre>
+      </div>
+
+      <p class="prosa">
+        L'applicazione risponde su <strong>http://localhost:5173</strong>. I dati
+        di esempio creano due utenze:
+      </p>
+
+      <div class="utenze">
+        <table>
+          <thead>
+            <tr><th scope="col">Ruolo</th><th scope="col">Email</th><th scope="col">Password</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>admin</td><td>demo@officino.app</td><td>admin123</td></tr>
+            <tr><td>operaio</td><td>operaio@officino.app</td><td>admin123</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="avviso">
+        <strong>Sono credenziali di dimostrazione:</strong> vanno cambiate prima di
+        qualunque uso reale, insieme a <code>JWT_SECRET</code> nel file
+        <code>.env</code>.
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══ Com'è fatto ═══ -->
+  <section class="sezione" id="come-fatto">
+    <div class="colonna">
+      <div class="testata">
+        <p class="occhiello">Com'è fatto</p>
+        <h2>Niente di esotico, e tutto self-hosted.</h2>
+      </div>
+      <div class="pila">
+        <div class="strato">
+          <h3>Backend</h3>
+          <ul>
+            <li>Fastify <span>5</span></li>
+            <li>PostgreSQL <span>15</span></li>
+            <li>Knex <span>query e migrazioni</span></li>
+            <li>JWT <span>autenticazione</span></li>
+            <li>PDFKit <span>documenti</span></li>
+            <li>Zod <span>validazione</span></li>
+            <li>Jest <span>test</span></li>
+          </ul>
+        </div>
+        <div class="strato">
+          <h3>Frontend</h3>
+          <ul>
+            <li>Vue 3 <span>con Vite</span></li>
+            <li>Bootstrap 5 <span>token propri</span></li>
+            <li>Chart.js <span>grafici</span></li>
+            <li>html5-qrcode <span>codici a barre</span></li>
+            <li>Barlow <span>font locali</span></li>
+            <li>Vitest <span>test</span></li>
+          </ul>
+        </div>
+        <div class="strato">
+          <h3>Infrastruttura</h3>
+          <ul>
+            <li>Docker <span>e Compose</span></li>
+            <li>Dev container <span>VS Code</span></li>
+            <li>GitHub Actions <span>CI</span></li>
+            <li>semantic-release <span>versioni</span></li>
+            <li>nginx <span>sito statico</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="pastiglie">
+        <span class="pastiglia">Licenza MIT</span>
+        <span class="pastiglia">Node 20</span>
+        <span class="pastiglia">Conventional Commits</span>
+        <span class="pastiglia">Nessun servizio esterno</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Stato attuale — lo stesso disclaimer del README, non addolcito ═══ -->
+  <section class="sezione sezione--bianca" id="stato">
+    <div class="colonna">
+      <div class="testata testata--allarme">
+        <p class="occhiello">Stato attuale, detto com'è</p>
+        <h2>Sei suite di integrazione falliscono.</h2>
+      </div>
+      <p class="prosa">
+        La CI esegue il frontend per intero e, del backend, lint e test unitari.
+        I test di integrazione restano fuori perché sei suite falliscono, per
+        quattro motivi distinti e tutti preesistenti. Sono elencati nella
+        <a href="https://github.com/savez/officino/issues/7">issue dei difetti noti</a>,
+        e sono il punto di partenza più utile per un primo contributo.
+      </p>
+      <p class="prosa">
+        Le pull request sono benvenute:
+        <a href="https://github.com/savez/officino/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>
+        spiega ambiente di sviluppo, convenzioni e cosa succede alla tua PR. Per
+        una vulnerabilità di sicurezza non aprire una issue &mdash; la procedura sta in
+        <a href="https://github.com/savez/officino/blob/main/SECURITY.md">SECURITY.md</a>.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="piede">
+  <div class="colonna piede-dentro">
+    <div>
+      <p class="piede-nome">
+        <svg class="marchio-segno" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <rect width="24" height="24" fill="#f97316"/>
+          <path fill="#fff" d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/>
+        </svg>
+        <span class="marchio-nome">Officino</span>
+      </p>
+      <p class="piede-tag">Gestionale open source per officine meccaniche.</p>
+      <ul class="piede-link piede-link--sotto">
+        <li><a href="https://github.com/savez/officino">Codice</a></li>
+        <li><a href="https://github.com/savez/officino/releases">Release</a></li>
+        <li><a href="https://github.com/savez/officino/blob/main/CONTRIBUTING.md">Contribuire</a></li>
+        <li><a href="https://github.com/savez/officino/blob/main/SECURITY.md">Sicurezza</a></li>
+        <li><a href="https://github.com/savez/officino/blob/main/LICENSE">Licenza</a></li>
+      </ul>
+    </div>
+    <p class="piede-meta">
+      MIT &middot; v<span id="versione">2.0.2</span><br>
+      <a class="piede-firma" href="https://github.com/savez">@savez</a>
+    </p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  'use strict';
+  var calmo = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ── Il numerale delle ore sale una volta, al caricamento ─────────────── */
+  var ore = document.getElementById('conta-ore');
+  if (ore && !calmo) {
+    var meta = 12.5, avvio = null, durata = 1100;
+    ore.textContent = '0,0';
+    var passo = function (t) {
+      if (avvio === null) avvio = t;
+      var q = Math.min((t - avvio) / durata, 1);
+      var e = 1 - Math.pow(1 - q, 3);
+      ore.textContent = (meta * e).toFixed(1).replace('.', ',');
+      if (q < 1) requestAnimationFrame(passo); else ore.textContent = '12,5';
+    };
+    requestAnimationFrame(passo);
+  }
+
+  /* ── Le tre tinte di stato arrivano quando la tabella entra in vista ──── */
+  var der = document.getElementById('derivazione');
+  if (der) {
+    if (calmo || !('IntersectionObserver' in window)) {
+      der.classList.add('acceso');
+    } else {
+      var occhio = new IntersectionObserver(function (voci) {
+        voci.forEach(function (v) {
+          if (v.isIntersecting) { der.classList.add('acceso'); occhio.disconnect(); }
+        });
+      }, { threshold: 0.4 });
+      occhio.observe(der);
+    }
+  }
+
+  /* ── Copia: il bottone dice «Copia», l'esito dice «Copiato» ──────────── */
+  Array.prototype.forEach.call(document.querySelectorAll('.copia'), function (b) {
+    b.addEventListener('click', function () {
+      var pre = document.getElementById(b.getAttribute('data-copia'));
+      if (!pre || !navigator.clipboard) return;
+      navigator.clipboard.writeText(pre.innerText.trim()).then(function () {
+        b.textContent = 'Copiato';
+        setTimeout(function () { b.textContent = 'Copia'; }, 1800);
+      }).catch(function () {});
+    });
+  });
+
+  /* ── Versione: releases API, in cache un'ora per non sbattere sul rate
+        limit. Con JS spento resta il fallback scritto nell'HTML. ────────── */
+  var el = document.getElementById('versione');
+  if (!el) return;
+  var CHIAVE = 'officino:ultima-release', TTL = 3600000;
+  try {
+    var c = JSON.parse(localStorage.getItem(CHIAVE) || 'null');
+    if (c && c.v && (Date.now() - c.t) < TTL) { el.textContent = c.v; return; }
+  } catch (e) {}
+  fetch('https://api.github.com/repos/savez/officino/releases/latest')
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) {
+      if (!d || !d.tag_name) return;
+      var v = String(d.tag_name).replace(/^v/, '');
+      el.textContent = v;
+      try { localStorage.setItem(CHIAVE, JSON.stringify({ v: v, t: Date.now() })); } catch (e) {}
+    })
+    .catch(function () {});
+})();
+</script>
+</body>
+</html>

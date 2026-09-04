@@ -1,0 +1,44 @@
+# Pubblica la landing su GitHub Pages.
+#
+# Il workflow vive sul branch `landing` e si attiva sui push a quel branch:
+# GitHub legge i workflow dal ref che è stato pushato, non da quello di default.
+#
+# Nessuno step di build. Il sito è un solo index.html autoconsistente — CSS, JS
+# e SVG inline — quindi non serve né Node né un package manager, e non c'è un
+# base-path da configurare che possa far fallire il caricamento degli asset
+# sotto /officino/.
+name: Deploy landing
+
+on:
+  push:
+    branches: [landing]
+  workflow_dispatch: # per rideployare senza dover fare un commit finto
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Una pubblicazione alla volta, e senza annullare quella in corso: interrompere
+# un deploy a metà lascerebbe il sito in uno stato che nessun commit descrive.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - id: pages
+        uses: actions/deploy-pages@v4
