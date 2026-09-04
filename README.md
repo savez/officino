@@ -135,20 +135,21 @@ validazione, Jest per i test.
 sistema di token, Chart.js per i grafici, html5-qrcode per i codici a barre,
 Vitest per i test.
 
-**Infrastruttura** — Docker e Docker Compose, dev container pronto per VS Code,
-GitHub Actions con semantic-release.
+**Infrastruttura** — Docker e Docker Compose con nginx davanti al frontend, dev
+container pronto per VS Code, GitHub Actions con semantic-release.
 
 ## Deploy
 
-C'è una guida per [Render.com](./docs/deploy-render.md), con `render.yaml` già
-predisposto. Gli indirizzi da compilare sono marcati `<YOUR_BACKEND_URL>` e
-`<YOUR_FRONTEND_URL>`.
-
-Per un deploy con Docker:
+Il deploy previsto è con Docker Compose:
 
 ```bash
 make prod              # oppure: docker compose -f docker/docker-compose.prod.yml up -d --build
 ```
+
+Lo stack alza PostgreSQL, il backend, e un nginx che serve il frontend compilato
+e inoltra `/api/` al backend (`frontend/nginx.conf`). Dall'ambiente vanno passati
+`JWT_SECRET` e `CORS_ORIGIN`, che il compose non ha valori di riserva per cui
+sostituire.
 
 Il seed parte da solo al primo avvio se il database è vuoto
 (`backend/src/seed-if-empty.js`).
