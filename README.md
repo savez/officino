@@ -169,6 +169,10 @@ Le pull request sono benvenute. Il progetto usa
 `docs:`, `refactor:`, `test:`, `chore:` — perché la versione la calcola
 semantic-release dai messaggi di commit.
 
+Al merge su `main` semantic-release crea il tag e pubblica la release su GitHub,
+con le note ricavate dai commit. Non scrive nulla dentro il repository: il campo
+`version` nei tre `package.json` si aggiorna a mano quando si alza la versione.
+
 Prima di aprire una PR conviene far girare `make test` e `make lint`.
 
 ## Licenza
