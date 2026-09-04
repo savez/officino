@@ -17,11 +17,11 @@ describe('getDashboardStats', () => {
   it('chiama api.get con il path e i parametri corretti', async () => {
     api.get.mockResolvedValue({ data: {} })
 
-    await getDashboardStats(3, 2026)
+    await getDashboardStats({ da: '2026-03-01', a: '2026-03-31' })
 
     expect(api.get).toHaveBeenCalledOnce()
     expect(api.get).toHaveBeenCalledWith('/dashboard/stats', {
-      params: { mese: 3, anno: 2026 },
+      params: { da: '2026-03-01', a: '2026-03-31' },
     })
   })
 
@@ -32,7 +32,7 @@ describe('getDashboardStats', () => {
     }
     api.get.mockResolvedValue({ data: fakeData })
 
-    const result = await getDashboardStats(1, 2026)
+    const result = await getDashboardStats({ da: '2026-01-01', a: '2026-01-31' })
 
     expect(result).toEqual(fakeData)
   })
@@ -41,7 +41,9 @@ describe('getDashboardStats', () => {
     const apiError = new Error('Network Error')
     api.get.mockRejectedValue(apiError)
 
-    await expect(getDashboardStats(1, 2026)).rejects.toThrow('Network Error')
+    await expect(getDashboardStats({ da: '2026-01-01', a: '2026-01-31' })).rejects.toThrow(
+      'Network Error'
+    )
   })
 })
 
@@ -64,10 +66,10 @@ describe('exportOreExcel', () => {
     const mockBlob = new Blob()
     api.get.mockResolvedValue({ data: mockBlob })
 
-    await exportOreExcel(3, 2026)
+    await exportOreExcel({ da: '2026-03-01', a: '2026-03-31' })
 
     expect(api.get).toHaveBeenCalledWith('/dashboard/export-ore', {
-      params: { mese: 3, anno: 2026 },
+      params: { da: '2026-03-01', a: '2026-03-31' },
       responseType: 'blob',
     })
   })
@@ -83,10 +85,17 @@ describe('exportOreExcel', () => {
     }
     createElementSpy.mockReturnValue(mockLink)
 
-    await exportOreExcel(3, 2026)
+    // Il nome del file arriva dal server, che conosce le date risolte anche
+    // quando il client ha chiesto una scorciatoia.
+    api.get.mockResolvedValue({
+      data: mockBlob,
+      headers: { 'content-disposition': 'attachment; filename="ore_2026-03-01_2026-03-31.xlsx"' },
+    })
+
+    await exportOreExcel({ da: '2026-03-01', a: '2026-03-31' })
 
     expect(createElementSpy).toHaveBeenCalledWith('a')
-    expect(mockLink.download).toBe('ore_2026_03.xlsx')
+    expect(mockLink.download).toBe('ore_2026-03-01_2026-03-31.xlsx')
     expect(mockLink.click).toHaveBeenCalled()
   })
 
@@ -101,7 +110,7 @@ describe('exportOreExcel', () => {
     }
     createElementSpy.mockReturnValue(mockLink)
 
-    await exportOreExcel(3, 2026)
+    await exportOreExcel({ da: '2026-03-01', a: '2026-03-31' })
 
     expect(window.URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-url')
   })
@@ -110,6 +119,8 @@ describe('exportOreExcel', () => {
     const apiError = new Error('Export failed')
     api.get.mockRejectedValue(apiError)
 
-    await expect(exportOreExcel(3, 2026)).rejects.toThrow('Export failed')
+    await expect(exportOreExcel({ da: '2026-03-01', a: '2026-03-31' })).rejects.toThrow(
+      'Export failed'
+    )
   })
 })

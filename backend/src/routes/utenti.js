@@ -9,7 +9,7 @@ const createUtenteSchema = z.object({
   email: z.string().email('Email non valida'),
   password: z.string().min(6, 'Password deve avere almeno 6 caratteri'),
   ruolo: z.enum(['user', 'admin']).default('user'),
-  costo_orario: z.number().min(0).default(0),
+  costo_orario: z.number().min(0).multipleOf(0.01).optional().default(0),
 });
 
 const updateUtenteSchema = z.object({
@@ -17,7 +17,7 @@ const updateUtenteSchema = z.object({
   email: z.string().email('Email non valida'),
   password: z.string().min(6, 'Password deve avere almeno 6 caratteri').optional().nullable(),
   ruolo: z.enum(['user', 'admin']).default('user'),
-  costo_orario: z.number().min(0).default(0),
+  costo_orario: z.number().min(0).multipleOf(0.01).optional().default(0),
 });
 
 /**

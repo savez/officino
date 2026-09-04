@@ -6,12 +6,22 @@ import { isAdmin } from '../services/auth'
 const route = useRoute()
 const admin = ref(isAdmin())
 
+// L'elenco delle sezioni riservate era scritto a mano qui, e ha smesso di
+// corrispondere alla realta' quando i permessi sono cambiati: la guida mostrava
+// Clienti e Preventivi a chi non poteva piu' aprirli, con tanto di istruzioni
+// su come creare un cliente.
+//
+// Il carattere riservato di ciascuna sezione va tenuto allineato al menu: sono
+// i due punti che decidono cosa l'utente vede, e se divergono la guida descrive
+// pagine che l'utente non trova. Un test lo verifica a ogni esecuzione
+// (guida-permessi.test.js).
 const sections = [
+  { id: 'ruoli', label: 'Chi può fare cosa' },
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'catalogo', label: 'Catalogo Prodotti' },
   { id: 'categorie', label: 'Categorie' },
-  { id: 'clienti', label: 'Clienti' },
-  { id: 'preventivi', label: 'Preventivi' },
+  { id: 'clienti', label: 'Clienti', adminOnly: true },
+  { id: 'preventivi', label: 'Preventivi', adminOnly: true },
   { id: 'rapportini', label: 'Rapportini' },
   { id: 'note-lavorazione', label: 'Note di Lavorazione', adminOnly: true },
   { id: 'utenti', label: 'Utenti', adminOnly: true },
@@ -77,6 +87,65 @@ onMounted(() => {
       <!-- Contenuto guida -->
       <div class="col-12 col-md-9">
 
+        <!-- ── Chi può fare cosa ──────────────────────────────────── -->
+        <section id="ruoli" class="mb-5">
+          <h3 class="border-bottom pb-2">
+            <i class="bi bi-person-badge me-2 text-primary"></i>Chi può fare cosa
+          </h3>
+          <p>
+            Officino ha due ruoli: <strong>Utente</strong> (l'operaio) e
+            <strong>Admin</strong>. Il ruolo decide quali voci compaiono nel menu e quali
+            operazioni sono permesse.
+          </p>
+
+          <h5>L'operaio</h5>
+          <p>Vede cinque voci di menu e su queste può lavorare:</p>
+          <ul>
+            <li>
+              <strong>Home</strong>: la dashboard con i <em>propri</em> dati — le proprie ore,
+              i propri clienti, i propri giorni sotto le 8 ore. Non vede mai i dati dei
+              colleghi.
+            </li>
+            <li>
+              <strong>Catalogo Prodotti</strong>: può consultare, aggiungere, modificare ed
+              eliminare articoli. È chi lavora a tenere aggiornato il magazzino.
+            </li>
+            <li>
+              <strong>Categorie</strong>: stesse possibilità del catalogo.
+            </li>
+            <li>
+              <strong>Rapportini</strong>: crea rapportini a proprio nome e vi aggiunge
+              lavorazioni finché non li dichiara conclusi. Dopo la conclusione servono le mani
+              di un amministratore per riaprirli. Vede soltanto i propri rapportini.
+            </li>
+            <li><strong>Guida</strong>: questa pagina.</li>
+          </ul>
+
+          <div class="alert alert-info py-2">
+            <strong>I clienti non sono nel menu, ma servono lo stesso.</strong>
+            Compilando un rapportino l'operaio sceglie il cliente da un elenco completo: può
+            <em>leggere</em> l'anagrafica, e questo continua a funzionare come prima. Quello
+            che non può fare è crearla o modificarla — l'anagrafica clienti la gestisce
+            l'amministratore.
+          </div>
+
+          <h5>L'amministratore</h5>
+          <p>
+            Vede e può fare tutto quanto sopra, e in più gestisce
+            <strong>Clienti</strong>, <strong>Preventivi</strong>,
+            <strong>Note di Lavorazione</strong>, <strong>Utenti</strong> e
+            <strong>Impostazioni</strong>. Sulla dashboard vede i dati di tutti gli operai e
+            può filtrarli per singola persona.
+          </p>
+
+          <h5>Se una voce non compare</h5>
+          <p>
+            Non è un guasto: significa che quell'area è riservata all'amministratore. Anche
+            questa guida si adegua al ruolo, e mostra soltanto le sezioni che riguardano ciò
+            che si può fare.
+          </p>
+        </section>
+
         <!-- ── Dashboard ──────────────────────────────────────────── -->
         <section id="dashboard" class="mb-5">
           <h3 class="border-bottom pb-2"><i class="bi bi-speedometer2 me-2 text-primary"></i>Dashboard</h3>
@@ -87,25 +156,86 @@ onMounted(() => {
 
           <h5>Filtro periodo</h5>
           <p>
-            In cima alla dashboard sono presenti due selettori per filtrare i dati per <strong>mese</strong>
-            e <strong>anno</strong>. Di default viene mostrato il mese corrente.
-            Cambiando il periodo, tutti i dati e i grafici si aggiornano automaticamente.
+            In cima alla dashboard si sceglie un <strong>intervallo di date</strong> indicando
+            la data iniziale e quella finale, estremi inclusi. Sono disponibili anche scorciatoie
+            per i periodi ricorrenti: <em>questo mese</em>, <em>mese scorso</em>,
+            <em>ultimi 30 giorni</em> e <em>quest'anno</em>. All'apertura viene proposto il mese
+            corrente. Cambiando il periodo, tutti i dati e i grafici si aggiornano
+            automaticamente, e anche l'esportazione in Excel segue lo stesso intervallo.
           </p>
 
-          <h5>Riepilogo KPI</h5>
-          <p>Quattro card riepilogative mostrano i dati principali del periodo:</p>
-          <ul>
-            <li><strong>Preventivi totali</strong>: numero totale di preventivi creati nel periodo.</li>
-            <li><strong>Aperti</strong>: preventivi in stato <em>bozza</em> o <em>approvato</em>.</li>
-            <li><strong>Chiusi</strong>: preventivi in stato <em>fatturato</em>, <em>rifiutato</em>, <em>scaduto</em> o <em>cancellato</em>.</li>
-            <li><strong>Ore lavorate</strong>: somma delle ore registrate nel periodo. Gli utenti vedono solo le proprie ore; gli admin vedono le ore di tutti gli operai.</li>
-          </ul>
-
-          <h5>Grafico: Preventivi per stato</h5>
+          <h5>Filtro operaio</h5>
           <p>
-            Un grafico a ciambella mostra la distribuzione dei preventivi per stato (bozza, approvato,
-            rifiutato, scaduto, fatturato, cancellato) nel periodo selezionato.
-            Se non ci sono preventivi nel periodo, viene mostrato un messaggio informativo.
+            Gli amministratori possono restringere l'intera dashboard a un singolo operaio.
+            L'elenco comprende chi ha rapportini nel periodo scelto. Selezionando
+            <em>Tutti gli operai</em> si torna alla vista complessiva. Gli altri utenti vedono
+            sempre e solo i propri dati.
+          </p>
+
+          <h5>Ore mancanti</h5>
+          <p>
+            Un pannello segnala i <strong>giorni feriali</strong> in cui sono state caricate meno
+            di 8 ore, così le ore mancanti si vedono quando la giornata è ancora fresca invece
+            di emergere a fine mese. Sabato e domenica non vengono mai segnalati, e nemmeno i
+            giorni non ancora arrivati.
+          </p>
+          <p>
+            I giorni <strong>parzialmente compilati</strong> sono distinti da quelli
+            <strong>completamente vuoti</strong>: i primi sono di solito ore dimenticate, i
+            secondi quasi sempre assenze. Il sistema non conosce ferie, permessi e festività,
+            quindi un giorno di ferie appare comunque come vuoto.
+          </p>
+          <p>
+            Gli amministratori vedono tutti gli operai; gli altri utenti vedono soltanto i
+            propri giorni, come promemoria per completare i rapportini.
+          </p>
+
+          <h5>Ore lavorate</h5>
+          <p>
+            Una card riporta la <strong>somma delle ore</strong> registrate nel periodo. Gli
+            utenti vedono le proprie; gli amministratori vedono quelle di tutti gli operai,
+            oppure di uno solo se il filtro operaio è attivo.
+          </p>
+
+          <h5>Rapportini nel periodo <span class="text-muted">(solo amministratori)</span></h5>
+          <p>
+            Quanti rapportini ci sono e in quale stato si trovano: <strong>aperti</strong>,
+            <strong>conclusi</strong> e <strong>in nota di lavorazione</strong>. Sono contati i
+            rapportini che hanno almeno una lavorazione nel periodo scelto, quindi uno iniziato
+            a gennaio e chiuso a marzo compare anche filtrando febbraio.
+          </p>
+          <p>
+            Accanto ai tre stati c'è una quarta voce, <strong>senza lavorazioni</strong>, e vale
+            la pena capire perché sta a parte. Un rapportino appena creato non contiene ancora
+            nulla, quindi <em>non ha date</em>: nessun periodo può escluderlo, e contarlo fra gli
+            aperti significherebbe contarlo ogni mese, per sempre, anche quando in quel mese non
+            è successo niente. Per questo è tenuto fuori dal conteggio del periodo e mostrato per
+            conto suo — anche quando vale zero.
+          </p>
+          <p>
+            Sommando i quattro numeri si ottiene esattamente il totale che mostra l'elenco dei
+            rapportini per lo stesso periodo e lo stesso filtro. Se non coincidono, uno dei due
+            sta sbagliando.
+          </p>
+
+          <h5>Note di lavorazione <span class="text-muted">(solo amministratori)</span></h5>
+          <p>
+            Quante note sono state emesse nel periodo e per quale <strong>importo
+            complessivo</strong>. Una nota appartiene al periodo in base alla sua
+            <strong>data di riferimento</strong>, cioè quella stampata sul documento consegnato
+            al cliente — non alla data in cui è stata creata.
+          </p>
+          <p>
+            L'importo è la somma di ciò che i documenti espongono davvero, <strong>compresi i
+            totali imposti a mano</strong>: è la cifra che i clienti hanno visto, non un
+            ricalcolo dai dettagli.
+          </p>
+          <p>
+            Quando è attivo il <strong>filtro per operaio</strong> l'importo non viene mostrato.
+            Non è una dimenticanza: una nota raccoglie i rapportini di un cliente e può contenere
+            il lavoro di più persone, quindi il totale del documento non è la quota di chi lo ha
+            in parte prodotto. Il numero delle note resta, e conta quelle a cui quell'operaio ha
+            contribuito con almeno un rapportino.
           </p>
 
           <h5>Grafico: Ore per cliente</h5>
@@ -115,7 +245,7 @@ onMounted(() => {
             clienti per cui hanno lavorato personalmente; gli admin vedono tutti i clienti.
           </p>
 
-          <h5>Grafico: Ore gestite vs non gestite <span class="badge bg-warning text-dark" style="font-size:0.7rem">admin</span></h5>
+          <h5>Grafico: Ore gestite vs non gestite <span class="text-muted">(solo amministratori)</span></h5>
           <p>
             Visibile solo agli amministratori. Mostra per ogni cliente la suddivisione tra:
           </p>
@@ -140,9 +270,16 @@ onMounted(() => {
           <ul>
             <li><strong>Ore per Operaio</strong>: riepilogo totale delle ore per ogni operaio.</li>
             <li><strong>Ore per Cliente</strong>: riepilogo totale delle ore per ogni cliente.</li>
-            <li><strong>Dettaglio</strong>: elenco completo di tutte le righe di rapportino con giorno, operaio, cliente, ore e note.</li>
+            <li>
+              <strong>Dettaglio</strong>: elenco completo delle lavorazioni con giorno,
+              operaio, cliente, macchinario, ore e note. Non contiene più le colonne di ora
+              inizio e ora fine: la fascia oraria non viene più registrata.
+            </li>
           </ul>
-          <p>Il file include i dati del periodo selezionato (mese e anno).</p>
+          <p>
+            Il file copre esattamente l'intervallo di date selezionato a schermo, e rispetta
+            anche il filtro per operaio: se ne stai guardando uno solo, esporti quello.
+          </p>
         </section>
 
         <!-- ── Catalogo Prodotti ──────────────────────────────────── -->
@@ -368,81 +505,160 @@ onMounted(() => {
 
         <!-- ── Rapportini ─────────────────────────────────────────── -->
         <section id="rapportini" class="mb-5">
-          <h3 class="border-bottom pb-2"><i class="bi bi-journal-text me-2 text-primary"></i>Rapportini</h3>
+          <h3 class="border-bottom pb-2">
+            <i class="bi bi-journal-text me-2 text-primary"></i>Rapportini
+          </h3>
           <p>
-            I rapportini registrano le ore di lavoro degli operai giorno per giorno,
-            associandole a un cliente e al materiale usato.
+            Un <strong>rapportino</strong> raccoglie tutto il lavoro svolto da un operaio su
+            <strong>un solo macchinario</strong> per <strong>un solo cliente</strong>. Dentro
+            ci stanno le <strong>lavorazioni</strong>: una per ogni giornata, con il numero di
+            ore e i materiali usati.
+          </p>
+          <p>
+            Un intervento che dura tre giorni è quindi <em>un</em> rapportino con tre
+            lavorazioni, non tre voci separate da ritrovare e sommare a mano.
           </p>
 
-          <h5>Come registrare una riga di rapportino</h5>
+          <h5>Registrare il lavoro di oggi</h5>
           <ol>
-            <li>Clicca <strong>"Nuova Riga"</strong>.</li>
-            <li>Seleziona il <strong>giorno</strong> (default: oggi).</li>
-            <li>Inserisci <strong>ora inizio</strong> e <strong>ora fine</strong> del lavoro.</li>
-            <li>Seleziona il <strong>cliente</strong> per cui si è lavorato.</li>
             <li>
-              Inserisci la <strong>macchina / attrezzatura</strong> su cui si è intervenuti
-              (campo libero, es. "Trattore John Deere 6130R", "Escavatore CAT 320").
+              Se il rapportino per quel macchinario esiste già, cercalo nell'elenco e clicca
+              <strong>"Aggiungi lavorazione"</strong>: cliente e macchinario non vanno
+              reinseriti.
             </li>
             <li>
-              Aggiungi i <strong>materiali</strong> utilizzati (opzionale):
-              cerca nel catalogo o inserisci un materiale libero non in catalogo.
+              Altrimenti clicca <strong>"Nuovo rapportino"</strong>, indica
+              <strong>cliente</strong> e <strong>macchinario</strong>, e poi aggiungi la prima
+              lavorazione.
             </li>
-            <li>Aggiungi <strong>note</strong> aggiuntive se necessario.</li>
+            <li>
+              Nella lavorazione indica il <strong>giorno</strong> — proposto a oggi — e il
+              <strong>numero di ore</strong>. Non serve più l'orario di inizio e fine: basta
+              sapere quante ore hai fatto su quella macchina.
+            </li>
+            <li>
+              Aggiungi i <strong>materiali</strong> usati e le <strong>note</strong>, se
+              servono.
+            </li>
           </ol>
 
-          <h5>Materiali nel rapportino</h5>
+          <h5>Come si indicano le ore</h5>
           <p>
-            Ogni riga può avere uno o più materiali utilizzati durante il lavoro.
-            I materiali possono essere:
+            Le ore si scrivono a <strong>quarti d'ora</strong>: 0,25 — 0,5 — 0,75 — 1 — 1,25 e
+            così via. Un valore come 4,3 non viene accettato perché non è un multiplo di un
+            quarto d'ora.
           </p>
+          <p>
+            Sopra le <strong>12 ore in una singola lavorazione</strong> compare un avviso, che
+            si può confermare. Non è un blocco: serve a intercettare un errore di battitura. Il
+            limite riguarda la singola lavorazione, non il totale della giornata: se lavori su
+            due macchinari lo stesso giorno le due somme restano separate e nessun avviso
+            compare.
+          </p>
+
+          <h5>Il macchinario</h5>
+          <p>
+            È un <strong>testo libero</strong> — per esempio "Trattore John Deere 6130R" o
+            "Escavatore CAT 320". Conviene scriverlo <strong>sempre allo stesso modo</strong>:
+            due scritture diverse creano due rapportini distinti e le ore si dividono fra i
+            due.
+          </p>
+          <p>
+            Quando crei un rapportino su un macchinario per cui ne hai già uno aperto con lo
+            stesso cliente, compare un avviso — anche se cambiano maiuscole e spazi. Il
+            rapportino viene creato lo stesso: la scelta resta tua. L'avviso non compare per
+            clienti diversi, perché lo stesso modello di macchina presso due aziende sono due
+            interventi distinti.
+          </p>
+
+          <h5>Concludere un rapportino</h5>
+          <p>
+            Quando il lavoro sulla macchina è finito, clicca <strong>"Concludi"</strong>. Da
+            quel momento il rapportino non è più modificabile e l'amministratore lo trova fra
+            quelli disponibili per la nota di lavorazione.
+          </p>
+          <p>
+            Un rapportino <strong>senza lavorazioni non si può concludere</strong>: un
+            intervento senza ore non è un intervento. Se l'hai creato per errore — per esempio
+            sbagliando il nome del macchinario — puoi eliminarlo finché è vuoto.
+          </p>
+
+          <h5>Gli stati</h5>
           <ul>
             <li>
-              <strong>Da catalogo</strong>: cerca il prodotto per nome nel campo di ricerca
-              e selezionalo dall'elenco.
+              <span class="badge bg-success">Aperto</span>: si aggiungono, modificano ed
+              eliminano lavorazioni.
             </li>
             <li>
-              <strong>Fuori catalogo</strong>: se il materiale non è in archivio,
-              usa l'opzione "fuori catalogo" per inserire il nome manualmente.
-              Non viene aggiunto al catalogo, è solo un riferimento testuale.
+              <span class="badge bg-secondary">Concluso</span>: dichiarato finito
+              dall'operaio. <strong>Non è più modificabile da nessuno</strong>, neanche
+              dall'amministratore: per correggerlo va prima riaperto. Solo un amministratore
+              può riaprirlo.
+            </li>
+            <li>
+              <span class="badge bg-info text-dark">In nota di lavorazione</span>: incluso in
+              una nota. Per intervenire va prima dissociato dalla nota; a quel punto torna
+              <em>concluso</em>, non aperto.
             </li>
           </ul>
 
-          <h5>Stati delle righe</h5>
+          <h5>Eliminare un rapportino</h5>
           <ul>
             <li>
-              <span class="badge bg-secondary">Aperta</span>: la riga non è ancora
-              stata collegata a una Nota di Lavorazione.
+              L'operaio elimina un proprio rapportino solo se è <strong>aperto e vuoto</strong>.
             </li>
             <li>
-              <span class="badge bg-success">Gestita</span>: la riga è stata inclusa
-              in una Nota di Lavorazione. Le righe gestite non possono essere
-              cancellate dagli operai (solo dall'admin).
+              L'amministratore lo elimina anche se contiene lavorazioni, con una conferma che
+              dichiara quante ne verranno perse.
+            </li>
+            <li>
+              Un rapportino concluso o in nota non si elimina: va prima riaperto o dissociato.
             </li>
           </ul>
 
-          <h5>Creare una Nota di Lavorazione</h5>
+          <h5>Filtrare l'elenco</h5>
           <p>
-            Solo gli admin possono creare note di lavorazione dai rapportini.
-            Per farlo:
+            Il filtro per <strong>intervallo di date</strong> mostra i rapportini che hanno
+            <strong>almeno una lavorazione</strong> nel periodo scelto. Vuol dire che un
+            rapportino iniziato a gennaio e chiuso a marzo compare anche filtrando febbraio:
+            non è un errore, è il modo in cui il filtro guarda gli interventi lunghi.
           </p>
-          <ol>
-            <li>Seleziona una o più righe con la casella di spunta (solo righe <em>aperte</em>).</li>
-            <li>Tutte le righe selezionate devono appartenere allo <strong>stesso cliente</strong>.</li>
-            <li>Clicca <strong>"Crea Nota di Lavorazione"</strong>.</li>
-          </ol>
-
-          <h5>Badge ore totali</h5>
           <p>
-            Nella barra in alto, una badge mostra il totale delle ore lavorate in base ai filtri
-            attivi (periodo, cliente, operaio, stato). Se applichi dei filtri, il numero si aggiorna
-            per mostrare solo le ore corrispondenti ai criteri selezionati.
+            L'intervallo si combina con i filtri per <strong>cliente</strong>,
+            <strong>operaio</strong> e <strong>stato</strong>. I totali si riferiscono a tutto
+            il periodo filtrato, non alla sola pagina visualizzata.
+          </p>
+          <p>
+            Nella colonna <strong>Periodo</strong> compare l'intervallo coperto dalle
+            lavorazioni, non un giorno singolo: un rapportino ne copre più d'uno. Un rapportino
+            appena creato mostra "nessuna lavorazione".
+          </p>
+          <p>
+            Un rapportino <strong>ancora senza lavorazioni compare sempre</strong>, qualunque
+            periodo sia impostato: non avendo una data, nessun intervallo può escluderlo.
+            Altrimenti sparirebbe appena creato e non ci si potrebbe più aggiungere la prima
+            lavorazione.
           </p>
 
-          <h5>Stampa rapportino</h5>
+          <h5>Materiali</h5>
           <p>
-            Il pulsante <strong>"Stampa"</strong> compare solo se è attivo un filtro per
-            giornata o per cliente. Genera un PDF riepilogativo delle righe filtrate.
+            I materiali stanno sulla <strong>singola lavorazione</strong>, non sul rapportino:
+            servono a sapere cosa è stato usato quel giorno. Possono venire dal
+            <strong>catalogo</strong> oppure essere inseriti a mano come
+            <strong>fuori catalogo</strong>, e in quel caso restano un semplice riferimento
+            testuale che non entra in archivio.
+          </p>
+
+          <h5>Dettaglio e stampa</h5>
+          <p>
+            Il pulsante <strong>"Dettaglio"</strong> apre l'elenco delle lavorazioni del
+            rapportino con i rispettivi materiali.
+          </p>
+          <p>
+            La <strong>stampa</strong> segue esattamente i filtri mostrati a schermo: il PDF
+            copre lo stesso periodo e lo stesso cliente che si stanno guardando, e li riporta
+            nell'intestazione. Serve almeno un filtro — un intervallo di date oppure un
+            cliente — altrimenti si stamperebbe l'intero storico dell'officina.
           </p>
         </section>
 
@@ -453,30 +669,135 @@ onMounted(() => {
             <span class="badge bg-warning text-dark ms-2" style="font-size: 0.7rem">Solo admin</span>
           </h3>
           <p>
-            Le Note di Lavorazione sono documenti riepilogativi che raccolgono più righe
-            di rapportino di uno stesso cliente in un unico documento stampabile.
-          </p>
-          <p>
-            Sono utili per consegnare al cliente un riepilogo delle ore lavorate
-            e dei materiali impiegati, come allegato o supporto alla fatturazione.
+            La Nota di Lavorazione è il documento che si consegna al cliente. Raccoglie uno o
+            più <strong>rapportini conclusi</strong> dello stesso cliente e produce un PDF
+            stampabile.
           </p>
 
-          <h5>Struttura di una nota</h5>
+          <h5>Data di riferimento</h5>
+          <p>
+            Ogni nota ha una <strong>data di riferimento</strong>, che si indica compilandola e
+            che compare nel titolo del documento: <em>«Nota di lavorazione per Azienda Rossi
+            del 31/08/2026»</em>.
+          </p>
+          <p>
+            È la data a cui il lavoro <strong>si riferisce</strong>, non quella in cui stai
+            preparando il documento. Se emetti oggi una nota per lavori di fine mese scorso,
+            indichi quella. Viene proposta a oggi e resta modificabile anche dopo.
+          </p>
+
+          <h5>Il riassunto è già scritto</h5>
+          <p>
+            Il campo del riassunto arriva <strong>già compilato</strong> con le note che gli
+            operai hanno scritto nelle singole lavorazioni, raggruppate per giorno. Non serve
+            ricopiarle: sono già lì.
+          </p>
+          <p>
+            Puoi modificarlo o cancellarlo e scriverne uno tuo. <strong>Da quel momento non
+            viene più rigenerato da solo</strong>, nemmeno se aggiungi o togli rapportini: il
+            tuo testo non si perde. Se vuoi ripartire da capo c'è il pulsante
+            <strong>«Rigenera dalle note»</strong>, che avvisa prima di sostituire quello che
+            hai scritto.
+          </p>
+          <p class="text-muted small">
+            Il rovescio: se modifichi il testo e poi aggiungi un rapportino, il riassunto non
+            parlerà di quell'intervento. Conviene rileggerlo prima di stampare.
+          </p>
+
+          <h5>Cosa mostrare nel documento</h5>
+          <p>
+            Due scelte <strong>indipendenti</strong>: il dettaglio dei materiali e quello della
+            manodopera. Puoi attivarli entrambi, uno solo, o nessuno dei due. Ciascuno porta
+            con sé il proprio totale.
+          </p>
           <ul>
-            <li><strong>Cliente</strong>: il cliente a cui è intestata la nota.</li>
-            <li><strong>Riassunto</strong>: testo libero opzionale con note descrittive.</li>
             <li>
-              <strong>Righe collegate</strong>: le righe di rapportino incluse nella nota,
-              con dettaglio di giorno, orario, operaio, macchina e materiali.
+              <strong>Dettaglio materiali</strong>: l'elenco dei pezzi con quantità, prezzo
+              unitario e importo di riga.
             </li>
-            <li><strong>Ore totali</strong>: somma automatica delle ore delle righe collegate.</li>
+            <li>
+              <strong>Dettaglio manodopera</strong>: le ore lavorate, una riga per giorno e
+              macchinario, con l'importo complessivo della manodopera. Il documento
+              <strong>non riporta la tariffa oraria</strong> né un importo accanto alle singole
+              ore.
+            </li>
           </ul>
+          <p>
+            Il <strong>totale complessivo</strong> c'è sempre, in tutte le combinazioni.
+          </p>
+
+          <h5>Correggere gli importi</h5>
+          <p>Ci sono tre modi, e vanno distinti:</p>
+          <ul>
+            <li>
+              <strong>Correggere un singolo materiale</strong>: cambi il prezzo di quella
+              riga, e quel valore vale da lì in avanti.
+            </li>
+            <li>
+              <strong>Imporre il totale dei materiali</strong> o quello della
+              <strong>manodopera</strong>: scrivi la cifra che vuoi far comparire.
+            </li>
+            <li>
+              <strong>Imporre il totale complessivo</strong>: decidi l'importo finale
+              dell'intero documento.
+            </li>
+          </ul>
+          <p>
+            <strong>Imporre un totale spegne il dettaglio corrispondente</strong>, e
+            l'interruttore diventa non selezionabile. Non è una limitazione arbitraria: un
+            elenco di righe che non somma alla cifra mostrata renderebbe il documento
+            contraddittorio davanti al cliente. Il totale complessivo imposto spegne
+            <strong>entrambi</strong> i dettagli, per lo stesso motivo.
+          </p>
+          <p>
+            Togliendo il totale imposto il dettaglio torna disponibile, e i totali tornano
+            quelli calcolati — comprese le correzioni fatte sulle singole righe, che restano
+            valide anche mentre l'importo imposto le copre.
+          </p>
+          <p class="text-muted small">
+            Le <strong>ore</strong> non si toccano mai dalla nota: raccontano il lavoro svolto.
+            Un importo imposto cambia quanto chiedi, non quanto è stato lavorato — quindi ore e
+            prezzo possono non essere più in rapporto fra loro, ed è voluto.
+          </p>
+
+          <h5>Un documento o più sezioni</h5>
+          <p>
+            Se la nota raccoglie <strong>più di un rapportino</strong>, ti viene chiesto come
+            presentarli: tutto insieme, oppure <strong>diviso per macchinario</strong>.
+            Dividendo, il documento ha una sezione per macchinario coi propri totali, più il
+            totale complessivo in fondo — utile quando il cliente vuole sapere quanto è costato
+            ciascuna macchina.
+          </p>
+          <p>
+            La divisione è <strong>per macchinario</strong>, non per rapportino: due rapportini
+            sullo stesso macchinario finiscono nella stessa sezione. Con un solo rapportino la
+            domanda non compare, perché le due scelte darebbero lo stesso documento.
+          </p>
+          <p class="text-muted small">
+            Un totale imposto vale per l'<em>intera nota</em>: compare una volta sola in fondo,
+            e le sezioni mostrano soltanto i totali che non sono stati imposti.
+          </p>
+
+          <h5>Avvisi prima della stampa</h5>
+          <p>
+            Prima di generare il PDF vengono segnalate le lavorazioni con costo orario a zero e
+            i materiali senza prezzo, così non finiscono nel documento per distrazione.
+            L'avviso <strong>non compare</strong> per una voce di cui hai imposto il totale:
+            quel valore non finirà nel documento, quindi non c'è nulla da correggere.
+          </p>
 
           <h5>Azioni disponibili</h5>
           <ul>
-            <li><strong>Stampa</strong>: genera un PDF della nota di lavorazione.</li>
-            <li><strong>Modifica</strong>: permette di aggiungere o rimuovere righe e modificare il riassunto.</li>
-            <li><strong>Elimina</strong>: elimina la nota. Le righe di rapportino tornano allo stato "Aperta".</li>
+            <li><strong>Stampa</strong>: genera il PDF della nota.</li>
+            <li>
+              <strong>Modifica</strong>: permette di aggiungere o rimuovere rapportini,
+              cambiare la data di riferimento e rivedere tutto il resto.
+            </li>
+            <li>
+              <strong>Elimina</strong>: elimina la nota. I rapportini collegati tornano allo
+              stato <em>Concluso</em> — non aperto: per renderli di nuovo modificabili serve una
+              riapertura esplicita.
+            </li>
           </ul>
         </section>
 

@@ -8,22 +8,22 @@ let adminToken;
 async function ensureTestUsers() {
   const passwordHash = await bcrypt.hash('admin123', 10);
 
-  const admin = await app.db('utenti').where({ email: 'admin@officina.it' }).first();
+  const admin = await app.db('utenti').where({ email: 'demo@officino.app' }).first();
   if (!admin) {
     await app.db('utenti').insert({
       nome: 'Test Admin',
-      email: 'admin@officina.it',
+      email: 'demo@officino.app',
       password_hash: passwordHash,
       ruolo: 'admin',
       costo_orario: 40,
     });
   }
 
-  const user = await app.db('utenti').where({ email: 'marco@officina.it' }).first();
+  const user = await app.db('utenti').where({ email: 'operaio@officino.app' }).first();
   if (!user) {
     await app.db('utenti').insert({
       nome: 'Test User',
-      email: 'marco@officina.it',
+      email: 'operaio@officino.app',
       password_hash: passwordHash,
       ruolo: 'user',
       costo_orario: 35,
@@ -44,7 +44,7 @@ async function getAuthToken() {
     method: 'POST',
     url: '/api/auth/login',
     payload: {
-      email: 'marco@officina.it',
+      email: 'operaio@officino.app',
       password: 'admin123',
     },
   });
@@ -66,7 +66,7 @@ async function getAdminToken() {
   const loginRes = await app.inject({
     method: 'POST',
     url: '/api/auth/login',
-    payload: { email: 'admin@officina.it', password: 'admin123' },
+    payload: { email: 'demo@officino.app', password: 'admin123' },
   });
 
   const loginBody = JSON.parse(loginRes.body);

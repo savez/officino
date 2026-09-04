@@ -1,0 +1,367 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// I componenti della direzione «targhetta di servizio».
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ── Tipografia di pagina ───────────────────────────────────────────────────
+h1,
+h2,
+h3 {
+  font-family: $of-display;
+  letter-spacing: 0.005em;
+}
+
+.of-etichetta {
+  font-size: $of-etichetta;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: $of-tenue;
+}
+
+// ── Le ore ─────────────────────────────────────────────────────────────────
+// Cifre tabulari sempre: le ore vanno incolonnate e confrontate.
+.of-ore {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: $of-inchiostro;
+  line-height: 1;
+}
+
+.of-ore--grandi {
+  font-size: $of-ore;
+  letter-spacing: -0.02em;
+}
+
+.of-ore--riga {
+  font-size: $of-ore-riga;
+}
+
+// ── Stato ──────────────────────────────────────────────────────────────────
+// I colori li decide StatoRapportino.vue: qui c'è solo la forma.
+.of-striscia {
+  width: $of-bordo-stato;
+  flex: none;
+  align-self: stretch;
+}
+
+.of-stato-testo {
+  font-size: $of-etichetta;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+// ── La scheda-targhetta ────────────────────────────────────────────────────
+.of-targhetta {
+  display: flex;
+  background: $of-superficie;
+  border: 1px solid $of-bordo;
+  margin-bottom: $of-passo * 3;
+}
+
+.of-targhetta__corpo {
+  flex: 1;
+  min-width: 0;
+  padding: $of-passo * 3 $of-passo * 3.5 $of-passo * 3.5;
+}
+
+.of-targhetta__macchina {
+  font-family: $of-display;
+  font-size: $of-macchina;
+  font-weight: 700;
+  line-height: 1.15;
+  color: $of-inchiostro;
+  margin: 0;
+}
+
+.of-targhetta__meta {
+  font-size: $of-meta;
+  color: $of-tenue;
+  margin: $of-passo * 1.5 0 0;
+}
+
+// L'azione principale sta IN FONDO e a tutta larghezza: con una mano sola il
+// pollice arriva lì, non in cima. È il vincolo dominante, più della dimensione.
+.of-azione-primaria {
+  display: block;
+  width: 100%;
+  min-height: $of-tocco-primario;
+  font-weight: 600;
+}
+
+.of-azione-secondaria {
+  min-height: $of-tocco;
+}
+
+// ── La tabella, sopra la soglia ────────────────────────────────────────────
+.of-tabella {
+  background: $of-superficie;
+
+  th {
+    font-size: $of-etichetta;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: $of-tenue;
+    font-weight: 600;
+    border-bottom-color: $of-bordo;
+  }
+
+  td {
+    vertical-align: middle;
+    border-bottom-color: $of-filo;
+  }
+
+  // La striscia di stato diventa la prima cella: stessa larghezza e stesso
+  // colore che ha sulla scheda. È l'elemento che rende riconoscibile la stessa
+  // cosa nelle due forme.
+  .of-cella-stato {
+    width: $of-bordo-stato;
+    padding: 0;
+  }
+}
+
+// ── Azione distruttiva ─────────────────────────────────────────────────────
+// Si distingue prima di leggerne il testo, ed e' l'unico posto in cui il
+// colore allarme compare: se apparisse altrove smetterebbe di significare
+// «attenzione».
+.btn-outline-danger,
+.btn-danger {
+  font-weight: 600;
+}
+
+// ── Fuoco da tastiera ──────────────────────────────────────────────────────
+// Doppio contorno: quello chiaro garantisce che si veda anche su fondo scuro.
+:focus-visible {
+  outline: 3px solid $of-abete;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.9);
+}
+
+// ── Movimento ──────────────────────────────────────────────────────────────
+// Le sole due animazioni previste. Un'interfaccia usata trenta volte al giorno
+// da chi ha fretta non guadagna nulla dal movimento: lo subisce.
+.of-striscia {
+  transition: background-color 150ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// ── Blocco filtri ──────────────────────────────────────────────────────────
+.of-filtri__interruttore {
+  display: flex;
+  align-items: center;
+  gap: $of-passo * 2;
+  width: 100%;
+  min-height: $of-tocco;
+  padding: $of-passo * 3;
+  background: $of-superficie;
+  border: 0;
+  font-weight: 600;
+  color: $of-inchiostro;
+  text-align: left;
+
+  span:first-child {
+    flex: 1;
+  }
+}
+
+.of-filtri__conteggio {
+  font-size: $of-etichetta;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $of-tenue;
+}
+
+// Sotto la soglia il corpo compare solo quando si apre.
+.of-filtri .of-filtri__corpo {
+  display: none;
+}
+
+.of-filtri--aperti .of-filtri__corpo {
+  display: block;
+}
+
+// Sul monitor l'interruttore sparisce e il corpo resta sempre visibile: lo
+// spazio non manca, e nascondere i filtri sarebbe un clic in piu' per nulla.
+@media (min-width: $of-soglia) {
+  .of-filtri .of-filtri__corpo {
+    display: block;
+  }
+}
+
+// ── Metriche della dashboard ───────────────────────────────────────────────
+//
+// Nessuna tinta nuova: i tre stati del rapportino prendono il colore da
+// `StatoRapportino`, e la voce «senza lavorazioni» non e' uno stato, quindi si
+// distingue per FORMA — un filo tratteggiato — come i giorni vuoti nel pannello
+// delle ore mancanti. E' lo stesso modo di dire «questo e' diverso» in tutta
+// l'applicazione.
+.of-metriche__griglia {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $of-passo * 3;
+}
+
+.of-metriche__voce {
+  display: flex;
+  flex-direction: column;
+  gap: $of-passo;
+  padding: $of-passo * 2 $of-passo * 3;
+  border-left: 3px solid $of-filo;
+}
+
+.of-metriche__voce--vuoti {
+  border-left-style: dashed;
+}
+
+.of-metriche__numero {
+  font-family: $of-display;
+  font-size: $of-ore;
+  font-weight: 700;
+  line-height: 1;
+  color: $of-inchiostro;
+  font-variant-numeric: tabular-nums;
+}
+
+// L'importo e' piu' lungo di un conteggio: alla stessa dimensione andrebbe a
+// capo sul telefono proprio dove serve leggerlo a colpo d'occhio.
+.of-metriche__numero--importo {
+  font-size: $of-ore-riga;
+}
+
+.of-metriche__etichetta {
+  font-size: $of-etichetta;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: $of-tenue;
+}
+
+.of-metriche__nota {
+  margin-top: $of-passo * 3;
+  font-size: $of-meta;
+  color: $of-tenue;
+}
+
+@media (min-width: $of-soglia) {
+  .of-metriche__griglia {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+// ── Filtro per periodo ─────────────────────────────────────────────────────
+.of-periodo {
+  display: flex;
+  flex-direction: column;
+  gap: $of-passo * 3;
+}
+
+// Due campi da metà: le date restano affiancate anche sul telefono, che è
+// come si leggono — «dal … al …» — invece di impilarsi.
+.of-periodo__date {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $of-passo * 2;
+}
+
+.of-periodo__campo input {
+  min-height: $of-tocco;
+}
+
+.of-periodo__scorciatoie {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $of-passo * 2;
+
+  .btn {
+    flex: 1 1 auto;
+    min-height: $of-tocco;
+    min-width: 6.5rem;
+  }
+}
+
+// Sul monitor lo spazio c'è: tutto torna in linea.
+@media (min-width: $of-soglia) {
+  .of-periodo {
+    flex-direction: row;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .of-periodo__date {
+    grid-template-columns: auto auto;
+  }
+
+  .of-periodo__campo input {
+    min-height: auto;
+  }
+
+  .of-periodo__scorciatoie .btn {
+    flex: 0 0 auto;
+    min-height: auto;
+    min-width: 0;
+  }
+}
+
+// ── Ore mancanti ───────────────────────────────────────────────────────────
+// Nessun colore. Il pannello esiste già per segnalare un problema: colorare
+// ogni riga non aggiunge informazione, e ruba significato ai tre colori degli
+// stati — che è esattamente quello che era successo, col marrone dell'«aperto»
+// finito sui badge delle ore mancanti.
+//
+// L'attenzione la porta il NUMERO, con lo stesso trattamento delle ore altrove,
+// più un filo verticale che raggruppa i giorni di un operaio.
+.of-operaio {
+  border-left: 2px solid $of-bordo;
+  padding-left: $of-passo * 3;
+  margin-bottom: $of-passo * 4;
+}
+
+.of-giorni {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $of-passo * 2;
+  margin-top: $of-passo * 2;
+}
+
+.of-giorno {
+  display: inline-flex;
+  align-items: baseline;
+  gap: $of-passo;
+  padding: $of-passo $of-passo * 2;
+  border: 1px solid $of-bordo;
+  font-size: $of-meta;
+  color: $of-inchiostro;
+  background: $of-superficie;
+}
+
+// Un giorno senza alcun rapportino non è un giorno con poche ore: è
+// probabilmente un'assenza. Si distingue per FORMA — tratteggio e testo tenue —
+// non per colore.
+.of-giorno--vuoto {
+  border-style: dashed;
+  border-color: $of-filo;
+  color: $of-tenue;
+}
+
+.of-giorno__nulla {
+  font-style: italic;
+}
+
+// ── Elenco vuoto ───────────────────────────────────────────────────────────
+// Dice cosa fare, invece di restare bianco.
+.of-vuoto {
+  border: 1px solid $of-filo;
+  background: $of-superficie;
+  padding: $of-passo * 6 $of-passo * 4;
+  text-align: center;
+  color: $of-tenue;
+}

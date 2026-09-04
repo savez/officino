@@ -17,6 +17,12 @@ const clienteSchema = z.object({
  */
 async function clientiRoutes(app) {
   // List (paginated, with optional archiviati filter)
+  // La scrittura sull'anagrafica clienti e' riservata all'amministratore. La
+  // LETTURA resta aperta di proposito: cliente_id e' obbligatorio su ogni riga
+  // di rapportino e la pagina carica l'elenco per popolare la tendina, quindi
+  // toglierla renderebbe i rapportini inutilizzabili (FR-001).
+  const adminOnly = [app.authenticate, app.requireRole('admin')];
+
   app.get('/', { preHandler: [app.authenticate] }, async (request) => {
     const { page, perPage, offset } = parsePagination(request.query);
     const { archiviati } = request.query;
@@ -110,7 +116,7 @@ async function clientiRoutes(app) {
   });
 
   // Create
-  app.post('/', { preHandler: [app.authenticate] }, async (request, reply) => {
+  app.post('/', { preHandler: adminOnly }, async (request, reply) => {
     const parsed = clienteSchema.safeParse(request.body);
     if (!parsed.success) {
       return reply.status(400).send({ error: 'Dati non validi', details: parsed.error.flatten() });
@@ -139,7 +145,7 @@ async function clientiRoutes(app) {
   });
 
   // Update
-  app.put('/:id', { preHandler: [app.authenticate] }, async (request, reply) => {
+  app.put('/:id', { preHandler: adminOnly }, async (request, reply) => {
     const { id } = request.params;
     const parsed = clienteSchema.safeParse(request.body);
     if (!parsed.success) {
@@ -181,7 +187,7 @@ async function clientiRoutes(app) {
   });
 
   // Archive (soft delete)
-  app.patch('/:id/archivia', { preHandler: [app.authenticate] }, async (request, reply) => {
+  app.patch('/:id/archivia', { preHandler: adminOnly }, async (request, reply) => {
     const { id } = request.params;
     const existing = await app.db('clienti').where({ id }).first();
     if (!existing) {
@@ -211,7 +217,7 @@ async function clientiRoutes(app) {
   });
 
   // Restore (unarchive)
-  app.patch('/:id/ripristina', { preHandler: [app.authenticate] }, async (request, reply) => {
+  app.patch('/:id/ripristina', { preHandler: adminOnly }, async (request, reply) => {
     const { id } = request.params;
     const existing = await app.db('clienti').where({ id }).first();
     if (!existing) {
@@ -241,7 +247,7 @@ async function clientiRoutes(app) {
   });
 
   // Delete (hard delete - only if no linked preventivi)
-  app.delete('/:id', { preHandler: [app.authenticate] }, async (request, reply) => {
+  app.delete('/:id', { preHandler: adminOnly }, async (request, reply) => {
     const { id } = request.params;
     const existing = await app.db('clienti').where({ id }).first();
     if (!existing) {

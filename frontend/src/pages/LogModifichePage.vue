@@ -1,5 +1,6 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+import BloccoFiltri from '../components/BloccoFiltri.vue';
 import AppPagination from '../components/AppPagination.vue';
 import { getLogs, countLogsBefore, purgeLogsBefore } from '../services/log';
 
@@ -23,6 +24,13 @@ const filterEntita = ref('');
 const filterAzione = ref('');
 const filterDataDa = ref('');
 const filterDataA = ref('');
+
+// Chiuso, l'accordion deve dire che l'elenco sotto e' gia' ristretto:
+// senza il conteggio si guarda un risultato parziale credendolo completo.
+const filtriAttivi = computed(
+  () => [filterEntita.value, filterAzione.value, filterDataDa.value, filterDataA.value]
+    .filter(Boolean).length,
+);
 
 // Expanded detail rows (set of log IDs)
 const expandedRows = ref(new Set());
@@ -302,10 +310,8 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Filters -->
-    <div class="card mb-3">
-      <div class="card-body py-2">
-        <div class="row g-2 align-items-end">
+    <BloccoFiltri :attivi="filtriAttivi">
+      <div class="row g-2 align-items-end">
           <!-- Entita -->
           <div class="col-6 col-md-2">
             <label class="form-label form-label-sm mb-1">Entit&agrave;</label>
@@ -346,10 +352,9 @@ onMounted(() => {
             <button class="btn btn-outline-secondary btn-sm" @click="onReset">
               <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
             </button>
-          </div>
         </div>
       </div>
-    </div>
+    </BloccoFiltri>
 
     <!-- Error -->
     <div v-if="error" class="alert alert-danger">{{ error }}</div>

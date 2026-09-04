@@ -1,368 +1,484 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { getRighe, cancellaRiga, stampaRapportini } from '../services/rapportini'
-import { creaNota } from '../services/note-lavorazione'
-import { isAdmin } from '../services/auth'
+import {
+  getRapportini,
+  cancellaRapportino,
+  chiudiRapportino,
+  riapriRapportino,
+  stampaRapportini,
+} from '../services/rapportini'
+import { isAdmin, getCurrentUser } from '../services/auth'
 import api from '../services/api'
-import RigaRapportinoFormModal from '../components/RigaRapportinoFormModal.vue'
+import FiltroPeriodo from '../components/FiltroPeriodo.vue'
+import RapportinoFormModal from '../components/RapportinoFormModal.vue'
+import LavorazioneFormModal from '../components/LavorazioneFormModal.vue'
+import RapportinoDettaglioModal from '../components/RapportinoDettaglioModal.vue'
 import NotaLavorazioneFormModal from '../components/NotaLavorazioneFormModal.vue'
+import ElencoRapportini from '../components/ElencoRapportini.vue'
 import HelpIcon from '../components/HelpIcon.vue'
+import HelpTooltip from '../components/HelpTooltip.vue'
+import BloccoFiltri from '../components/BloccoFiltri.vue'
 
 const admin = computed(() => isAdmin())
-const righe = ref([])
-const loading = ref(false)
-const error = ref('')
-const page = ref(1)
-const totalPages = ref(1)
-const total = ref(0)
+const utenteCorrente = computed(() => getCurrentUser() || {})
+
+const rapportini = ref([])
+const caricamento = ref(false)
+const errore = ref('')
+const pagina = ref(1)
+const pagineTotali = ref(1)
+const totale = ref(0)
 const oreTotali = ref(0)
 
-// Filters
 const filtroClienteId = ref('')
 const filtroUtenteId = ref('')
-const filtroGiorno = ref('')
-const filtroGestita = ref('')
+const filtroStato = ref('')
 const clienti = ref([])
 const utenti = ref([])
 
-// Modals
-const showFormModal = ref(false)
-const showNotaModal = ref(false)
+const oggi = new Date()
 
-// Selection for creating nota
-const selectedIds = ref([])
+function formattaData(d) {
+  const mese = String(d.getMonth() + 1).padStart(2, '0')
+  const giorno = String(d.getDate()).padStart(2, '0')
+  return `${d.getFullYear()}-${mese}-${giorno}`
+}
+
+const periodoIniziale = () => ({
+  da: formattaData(new Date(oggi.getFullYear(), oggi.getMonth(), 1)),
+  a: formattaData(new Date(oggi.getFullYear(), oggi.getMonth() + 1, 0)),
+})
+
+const periodo = ref(periodoIniziale())
+
+// Chiuso di partenza sul telefono; su monitor lo stile lo tiene sempre aperto.
+
+// Il conteggio dice se sotto c'e' qualcosa che sta restringendo l'elenco: senza,
+// un filtro dimenticato spiega un elenco vuoto solo dopo averlo riaperto.
+const filtriAttivi = computed(
+  () =>
+    [filtroClienteId.value, filtroUtenteId.value, filtroStato.value].filter(Boolean).length,
+)
+
+const mostraFormRapportino = ref(false)
+const mostraFormLavorazione = ref(false)
+const mostraDettaglio = ref(false)
+const mostraFormNota = ref(false)
+const rapportinoAttivo = ref(null)
+const lavorazioneInModifica = ref(null)
+const dettaglioId = ref(null)
+
+const selezionati = ref([])
+
 
 onMounted(async () => {
-  await loadRighe()
+  await caricaRapportini()
   try {
-    const { data: clientiData } = await api.get('/clienti/all')
-    clienti.value = clientiData
-  } catch { /* ignore */ }
+    const { data } = await api.get('/clienti/all')
+    clienti.value = data
+  } catch {
+    /* l'elenco clienti è un contorno: se manca, i filtri restano usabili */
+  }
   if (admin.value) {
     try {
-      const { data: utentiData } = await api.get('/utenti')
-      utenti.value = utentiData.data || utentiData
-    } catch { /* ignore */ }
+      const { data } = await api.get('/utenti')
+      utenti.value = data.data || data
+    } catch {
+      /* idem */
+    }
   }
 })
 
-async function loadRighe() {
-  loading.value = true
-  error.value = ''
+// Cambiando filtro in fretta le risposte possono tornare fuori ordine: senza
+// questo contatore vincerebbe l'ultima ARRIVATA invece dell'ultima CHIESTA, e
+// la tabella mostrerebbe righe di un periodo già abbandonato.
+let richiestaCorrente = 0
+
+async function caricaRapportini() {
+  const miaRichiesta = ++richiestaCorrente
+  caricamento.value = true
+  errore.value = ''
   try {
-    const params = { page: page.value, per_page: 20 }
+    const params = { page: pagina.value, per_page: 20 }
     if (filtroClienteId.value) params.cliente_id = filtroClienteId.value
     if (filtroUtenteId.value) params.utente_id = filtroUtenteId.value
-    if (filtroGiorno.value) params.giorno = filtroGiorno.value
-    if (filtroGestita.value) params.gestita = filtroGestita.value
+    if (filtroStato.value) params.stato = filtroStato.value
+    if (periodo.value.da) params.da = periodo.value.da
+    if (periodo.value.a) params.a = periodo.value.a
 
-    const result = await getRighe(params)
-    righe.value = result.data || []
-    totalPages.value = result.pagination?.totalPages || 1
-    total.value = result.pagination?.total || 0
-    oreTotali.value = result.ore_totali_filtrate || 0
+    const risultato = await getRapportini(params)
+    if (miaRichiesta !== richiestaCorrente) return
+
+    rapportini.value = risultato.data || []
+    pagineTotali.value = risultato.pagination?.totalPages || 1
+    totale.value = risultato.pagination?.total || 0
+    oreTotali.value = risultato.ore_totali_filtrate || 0
   } catch (err) {
-    error.value = 'Errore nel caricamento dei rapportini.'
+    if (miaRichiesta !== richiestaCorrente) return
+    errore.value = err?.response?.data?.error || 'Errore nel caricamento dei rapportini.'
   } finally {
-    loading.value = false
+    if (miaRichiesta === richiestaCorrente) caricamento.value = false
   }
 }
 
-function applyFilters() {
-  page.value = 1
-  selectedIds.value = []
-  loadRighe()
+// Il cambio di periodo riporta a pagina 1: senza, restringendo l'intervallo
+// mentre si è a pagina 5 la tabella apparirebbe vuota pur essendoci righe.
+function onPeriodoChange(nuovo) {
+  periodo.value = nuovo
+  applicaFiltri()
 }
 
-function resetFilters() {
+function applicaFiltri() {
+  pagina.value = 1
+  selezionati.value = []
+  caricaRapportini()
+}
+
+function azzeraFiltri() {
   filtroClienteId.value = ''
   filtroUtenteId.value = ''
-  filtroGiorno.value = ''
-  filtroGestita.value = ''
-  applyFilters()
+  filtroStato.value = ''
+  periodo.value = periodoIniziale()
+  applicaFiltri()
 }
 
-function changePage(p) {
-  page.value = p
-  loadRighe()
+function cambiaPagina(p) {
+  pagina.value = p
+  caricaRapportini()
 }
 
-async function onCancella(riga) {
-  if (!confirm('Sei sicuro di voler cancellare questa riga?')) return
-  try {
-    await cancellaRiga(riga.id)
-    await loadRighe()
-  } catch (err) {
-    alert(err.response?.data?.error || 'Errore durante la cancellazione.')
-  }
+function formattaGiorno(valore) {
+  if (!valore) return '—'
+  const d = new Date(valore)
+  const giorno = String(d.getDate()).padStart(2, '0')
+  const mese = String(d.getMonth() + 1).padStart(2, '0')
+  return `${giorno}/${mese}/${d.getFullYear()}`
 }
 
-function calcolaOre(oraInizio, oraFine) {
-  const [hi, mi] = oraInizio.split(':').map(Number)
-  const [hf, mf] = oraFine.split(':').map(Number)
-  return Math.round(((hf * 60 + mf - hi * 60 - mi) / 60) * 100) / 100
+/**
+ * Il periodo coperto da un rapportino, oppure la ragione per cui non ce n'è uno.
+ *
+ * Una cella vuota si legge come un difetto di caricamento; questo dice che il
+ * rapportino esiste e attende la prima lavorazione.
+ * @param {object} r - rapportino
+ * @returns {string} testo da mostrare
+ */
+function periodoLeggibile(r) {
+  if (!r.periodo) return 'nessuna lavorazione'
+  if (r.periodo.da === r.periodo.a) return formattaGiorno(r.periodo.da)
+  return `${formattaGiorno(r.periodo.da)} — ${formattaGiorno(r.periodo.a)}`
 }
 
-function formatDate(dateStr) {
-  const d = new Date(dateStr)
-  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`
+function formattaOre(n) {
+  return (Number(n) || 0).toFixed(2).replace('.', ',')
 }
 
-// Selection logic
-function toggleSelect(id) {
-  const idx = selectedIds.value.indexOf(id)
-  if (idx >= 0) {
-    selectedIds.value.splice(idx, 1)
-  } else {
-    selectedIds.value.push(id)
-  }
+function eAutore(r) {
+  return r.utente_id === utenteCorrente.value?.id
 }
 
-function isSelected(id) {
-  return selectedIds.value.includes(id)
+function puoAggiungere(r) {
+  return r.stato === 'aperto' && (admin.value || eAutore(r))
 }
 
-const selectedRighe = computed(() => righe.value.filter((r) => selectedIds.value.includes(r.id)))
-
-const selectedSameCliente = computed(() => {
-  if (selectedRighe.value.length === 0) return true
-  const clienteId = selectedRighe.value[0].cliente_id
-  return selectedRighe.value.every((r) => r.cliente_id === clienteId)
-})
-
-const canCreateNota = computed(() => {
-  return (
-    admin.value &&
-    selectedIds.value.length > 0 &&
-    selectedSameCliente.value &&
-    selectedRighe.value.every((r) => !r.nota_lavorazione_id)
-  )
-})
-
-function openNotaModal() {
-  if (!canCreateNota.value) return
-  showNotaModal.value = true
+function puoConcludere(r) {
+  return r.stato === 'aperto' && eAutore(r) && r.numero_lavorazioni > 0
 }
 
-async function onStampa() {
-  const params = {}
-  if (filtroGiorno.value) params.giorno = filtroGiorno.value
-  if (filtroClienteId.value) params.cliente_id = filtroClienteId.value
-  if (!params.giorno && !params.cliente_id) {
-    alert('Seleziona un filtro per giornata o cliente per stampare.')
+function puoRiaprire(r) {
+  return r.stato === 'chiuso' && admin.value
+}
+
+function puoEliminare(r) {
+  if (r.stato !== 'aperto') return false
+  if (admin.value) return true
+  return eAutore(r) && r.numero_lavorazioni === 0
+}
+
+function apriNuovoRapportino() {
+  mostraFormRapportino.value = true
+}
+
+function apriAggiungiLavorazione(r) {
+  rapportinoAttivo.value = r
+  lavorazioneInModifica.value = null
+  mostraFormLavorazione.value = true
+}
+
+function apriDettaglio(r) {
+  dettaglioId.value = r.id
+  mostraDettaglio.value = true
+}
+
+function apriModificaLavorazione(lavorazione) {
+  rapportinoAttivo.value = rapportini.value.find((r) => r.id === dettaglioId.value) || null
+  lavorazioneInModifica.value = lavorazione
+  mostraDettaglio.value = false
+  mostraFormLavorazione.value = true
+}
+
+function onDettaglioAggiungi(dettaglio) {
+  rapportinoAttivo.value = dettaglio
+  lavorazioneInModifica.value = null
+  mostraDettaglio.value = false
+  mostraFormLavorazione.value = true
+}
+
+async function onLavorazioneSalvata() {
+  await caricaRapportini()
+}
+
+async function concludi(r) {
+  if (!confirm(`Dichiarare concluso il rapportino su «${r.macchina}»? Non potrai più modificarlo.`))
     return
-  }
   try {
+    await chiudiRapportino(r.id)
+    await caricaRapportini()
+  } catch (err) {
+    errore.value = err?.response?.data?.error || 'Non è stato possibile concludere il rapportino.'
+  }
+}
+
+async function riapri(r) {
+  try {
+    await riapriRapportino(r.id)
+    await caricaRapportini()
+  } catch (err) {
+    errore.value = err?.response?.data?.error || 'Non è stato possibile riaprire il rapportino.'
+  }
+}
+
+async function elimina(r) {
+  // La conferma dichiara quante lavorazioni si perdono: cancellare ore
+  // registrate non deve poter accadere per un clic distratto.
+  const avvertimento =
+    r.numero_lavorazioni > 0
+      ? `Il rapportino su «${r.macchina}» contiene ${r.numero_lavorazioni} lavorazioni, che verranno eliminate. Procedere?`
+      : `Eliminare il rapportino su «${r.macchina}»?`
+  if (!confirm(avvertimento)) return
+
+  try {
+    await cancellaRapportino(r.id)
+    await caricaRapportini()
+  } catch (err) {
+    errore.value = err?.response?.data?.error || "Non è stato possibile eliminare il rapportino."
+  }
+}
+
+function alterna(id) {
+  const i = selezionati.value.indexOf(id)
+  if (i >= 0) selezionati.value.splice(i, 1)
+  else selezionati.value.push(id)
+}
+
+function eSelezionato(id) {
+  return selezionati.value.includes(id)
+}
+
+const rapportiniSelezionati = computed(() =>
+  rapportini.value.filter((r) => selezionati.value.includes(r.id)),
+)
+
+const stessoCliente = computed(() => {
+  if (rapportiniSelezionati.value.length === 0) return true
+  const clienteId = rapportiniSelezionati.value[0].cliente_id
+  return rapportiniSelezionati.value.every((r) => r.cliente_id === clienteId)
+})
+
+// Solo i rapportini CONCLUSI entrano in una nota: uno ancora aperto potrebbe
+// ricevere altre ore dopo che la nota è stata compilata.
+const puoCreareNota = computed(
+  () =>
+    admin.value &&
+    selezionati.value.length > 0 &&
+    stessoCliente.value &&
+    rapportiniSelezionati.value.every((r) => r.stato === 'chiuso'),
+)
+
+function selezionabile(r) {
+  return admin.value && r.stato === 'chiuso'
+}
+
+async function onNotaSalvata() {
+  mostraFormNota.value = false
+  selezionati.value = []
+  await caricaRapportini()
+}
+
+async function stampa() {
+  try {
+    const params = {}
+    if (periodo.value.da) params.da = periodo.value.da
+    if (periodo.value.a) params.a = periodo.value.a
+    if (filtroClienteId.value) params.cliente_id = filtroClienteId.value
     await stampaRapportini(params)
-  } catch {
-    alert('Errore durante la generazione del PDF.')
+  } catch (err) {
+    errore.value = err?.response?.data?.error || 'Non è stato possibile generare la stampa.'
   }
 }
 </script>
 
 <template>
-  <div>
+  <div class="container-fluid py-3">
     <div class="d-flex justify-content-between align-items-center mb-3">
-      <h2>
-        <i class="bi bi-journal-text me-2"></i>Rapportini
-        <HelpIcon anchor="rapportini" />
+      <h2 class="mb-0">
+        Rapportini
+<HelpIcon anchor="rapportini" />
       </h2>
       <div class="d-flex gap-2">
-        <button
-          v-if="admin && (filtroGiorno || filtroClienteId)"
-          class="btn btn-outline-secondary"
-          @click="onStampa"
-        >
-          <i class="bi bi-printer me-1"></i>Stampa
-        </button>
-        <button class="btn btn-primary" @click="showFormModal = true">
-          <i class="bi bi-plus-lg me-1"></i>Nuova Riga
-        </button>
+        <button v-if="admin" class="btn btn-outline-secondary" @click="stampa">Stampa</button>
+        <button class="btn btn-primary" @click="apriNuovoRapportino">Nuovo rapportino</button>
       </div>
     </div>
 
-    <!-- Filters -->
-    <div class="card card-body bg-light mb-3">
-      <div class="row g-2 align-items-end">
-        <div class="col-12 col-md-3">
-          <label class="form-label small">Giorno</label>
-          <input v-model="filtroGiorno" type="date" class="form-control form-control-sm" />
-        </div>
-        <div class="col-12 col-md-3">
-          <label class="form-label small">Cliente</label>
-          <select v-model="filtroClienteId" class="form-select form-select-sm">
-            <option value="">Tutti</option>
-            <option v-for="c in clienti" :key="c.id" :value="c.id">{{ c.nome }}</option>
-          </select>
-        </div>
-        <div v-if="admin" class="col-12 col-md-2">
-          <label class="form-label small">Operaio</label>
-          <select v-model="filtroUtenteId" class="form-select form-select-sm">
-            <option value="">Tutti</option>
-            <option v-for="u in utenti" :key="u.id" :value="u.id">{{ u.nome }}</option>
-          </select>
-        </div>
-        <div class="col-12 col-md-2">
-          <label class="form-label small">Stato</label>
-          <select v-model="filtroGestita" class="form-select form-select-sm">
-            <option value="">Tutti</option>
-            <option value="false">Non gestite</option>
-            <option value="true">Gestite</option>
-          </select>
-        </div>
-        <div class="col-auto d-flex gap-1">
-          <button class="btn btn-sm btn-primary" @click="applyFilters">
-            <i class="bi bi-search"></i>
-          </button>
-          <button class="btn btn-sm btn-outline-secondary" @click="resetFilters">
-            <i class="bi bi-x-lg"></i>
-          </button>
-        </div>
-      </div>
-    </div>
+    <div v-if="errore" class="alert alert-danger">{{ errore }}</div>
 
-    <!-- Create Nota button -->
-    <div v-if="admin && selectedIds.length > 0" class="mb-3">
-      <button
-        class="btn btn-success"
-        :disabled="!canCreateNota"
-        @click="openNotaModal"
-      >
-        <i class="bi bi-clipboard-check me-1"></i>Crea Nota di Lavorazione ({{ selectedIds.length }} righe)
-      </button>
-      <small v-if="!selectedSameCliente" class="text-danger ms-2">
-        Le righe selezionate devono essere dello stesso cliente.
-      </small>
-    </div>
-
-    <!-- Loading -->
-    <div v-if="loading" class="text-center py-4">
-      <span class="spinner-border"></span>
-    </div>
-
-    <!-- Error -->
-    <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
-
-    <!-- Empty -->
-    <div v-else-if="righe.length === 0" class="text-center text-muted py-4">
-      Nessuna riga di rapportino trovata.
-    </div>
-
-    <!-- Table -->
-    <div v-else class="table-responsive">
-      <table class="table table-hover table-sm">
-        <thead class="table-light">
-          <tr>
-            <th v-if="admin" style="width: 30px"></th>
-            <th>Giorno</th>
-            <th>Orario</th>
-            <th>Ore</th>
-            <th v-if="admin">Operaio</th>
-            <th>Cliente</th>
-            <th>Macchina</th>
-            <th>Materiali</th>
-            <th>Note</th>
-            <th>Stato</th>
-            <th style="width: 60px"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="riga in righe" :key="riga.id">
-            <td v-if="admin">
-              <input
-                v-if="!riga.nota_lavorazione_id"
-                type="checkbox"
-                class="form-check-input"
-                :checked="isSelected(riga.id)"
-                @change="toggleSelect(riga.id)"
+    <BloccoFiltri :attivi="filtriAttivi">
+        <div class="row g-3 align-items-end">
+          <div class="col-12">
+            <label class="of-etichetta d-block mb-2">
+              Periodo
+              <!-- Il significato del filtro non e' ovvio e va detto, ma da
+                   paragrafo occupava quattro righe in cima alla schermata del
+                   telefono. Come suggerimento resta raggiungibile e non
+                   ingombra. -->
+              <HelpTooltip
+                text="Sono elencati i rapportini con almeno una lavorazione nel periodo scelto: uno iniziato a gennaio e chiuso a marzo compare anche filtrando febbraio. I rapportini ancora senza lavorazioni compaiono sempre, perché non avendo una data nessun periodo può escluderli."
               />
-            </td>
-            <td>{{ formatDate(riga.giorno) }}</td>
-            <td>{{ riga.ora_inizio }} - {{ riga.ora_fine }}</td>
-            <td>{{ calcolaOre(riga.ora_inizio, riga.ora_fine) }}h</td>
-            <td v-if="admin">{{ riga.utente_nome }}</td>
-            <td>{{ riga.cliente_nome }}</td>
-            <td>{{ riga.macchina || '-' }}</td>
-            <td>
-              <span v-if="riga.materiali && riga.materiali.length > 0">
-                <span
-                  v-for="(m, i) in riga.materiali"
-                  :key="i"
-                  class="badge bg-light text-dark me-1"
-                >{{ m.nome }} x{{ m.quantita }}</span>
-              </span>
-              <span v-else class="text-muted">-</span>
-            </td>
-            <td>
-              <small>{{ riga.note || '-' }}</small>
-            </td>
-            <td>
-              <span v-if="riga.nota_lavorazione_id" class="badge bg-success">Gestita</span>
-              <span v-else class="badge bg-secondary">Aperta</span>
-            </td>
-            <td>
-              <button
-                v-if="!riga.nota_lavorazione_id || admin"
-                class="btn btn-sm btn-outline-danger"
-                title="Cancella"
-                @click="onCancella(riga)"
-              >
-                <i class="bi bi-trash"></i>
-              </button>
-              <span
-                v-else
-                class="text-muted small"
-                title="Solo l'amministratore può cancellare righe gestite"
-              >
-                <i class="bi bi-lock"></i>
-              </span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            </label>
+            <FiltroPeriodo :da="periodo.da" :a="periodo.a" @update:periodo="onPeriodoChange" />
+          </div>
+
+          <div class="col-6 col-lg-3">
+            <label class="form-label">Cliente</label>
+            <select v-model="filtroClienteId" class="form-select" @change="applicaFiltri">
+              <option value="">Tutti</option>
+              <option v-for="c in clienti" :key="c.id" :value="c.id">{{ c.nome }}</option>
+            </select>
+          </div>
+
+          <div v-if="admin" class="col-6 col-lg-3">
+            <label class="form-label">Operaio</label>
+            <select v-model="filtroUtenteId" class="form-select" @change="applicaFiltri">
+              <option value="">Tutti</option>
+              <option v-for="u in utenti" :key="u.id" :value="u.id">{{ u.nome }}</option>
+            </select>
+          </div>
+
+          <div class="col-6 col-lg-3">
+            <label class="form-label">Stato</label>
+            <select v-model="filtroStato" class="form-select" @change="applicaFiltri">
+              <option value="">Tutti</option>
+              <option value="aperto">Aperti</option>
+              <option value="chiuso">Conclusi</option>
+              <option value="gestito">In nota di lavorazione</option>
+            </select>
+          </div>
+
+          <div class="col-6 col-lg-3">
+            <label class="form-label d-none d-lg-block">&nbsp;</label>
+            <button class="btn btn-outline-secondary w-100" @click="azzeraFiltri">
+              Azzera filtri
+            </button>
+          </div>
+        </div>
+    </BloccoFiltri>
+
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <span class="text-muted">
+        {{ totale }} {{ totale === 1 ? 'rapportino' : 'rapportini' }} — {{ formattaOre(oreTotali) }} ore nel periodo
+      </span>
+      <button
+        v-if="admin"
+        class="btn btn-sm btn-success"
+        :disabled="!puoCreareNota"
+        @click="mostraFormNota = true"
+      >
+        Crea nota di lavorazione ({{ selezionati.length }})
+      </button>
     </div>
 
-    <!-- Pagination -->
-    <nav v-if="totalPages > 1" class="d-flex justify-content-center">
-      <ul class="pagination pagination-sm">
-        <li class="page-item" :class="{ disabled: page <= 1 }">
-          <button class="page-link" @click="changePage(page - 1)">&laquo;</button>
+    <div v-if="admin && selezionati.length > 0 && !stessoCliente" class="alert alert-warning py-2">
+      I rapportini selezionati sono di clienti diversi: una nota di lavorazione riguarda un
+      cliente solo.
+    </div>
+
+    <div v-if="caricamento" class="text-center py-5">
+      <div class="spinner-border" role="status"></div>
+    </div>
+
+    <div v-else-if="rapportini.length === 0" class="of-vuoto">
+      <p class="mb-2">Nessun rapportino nel periodo selezionato.</p>
+      <p class="mb-0 small">
+        Crea un rapportino per il macchinario su cui stai lavorando, poi aggiungici le ore
+        giorno per giorno.
+      </p>
+    </div>
+
+    <ElencoRapportini
+      v-else
+      :rapportini="rapportini"
+      :admin="admin"
+      :selezionati="selezionati"
+      :puo-aggiungere="puoAggiungere"
+      :puo-concludere="puoConcludere"
+      :puo-riaprire="puoRiaprire"
+      :puo-eliminare="puoEliminare"
+      :selezionabile="selezionabile"
+      :periodo-leggibile="periodoLeggibile"
+      :formatta-ore="formattaOre"
+      @aggiungi="apriAggiungiLavorazione"
+      @dettaglio="apriDettaglio"
+      @concludi="concludi"
+      @riapri="riapri"
+      @elimina="elimina"
+      @alterna="alterna"
+    />
+
+
+    <nav v-if="pagineTotali > 1" class="mt-3">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" :class="{ disabled: pagina === 1 }">
+          <button class="page-link" @click="cambiaPagina(pagina - 1)">Precedente</button>
         </li>
-        <li
-          v-for="p in totalPages"
-          :key="p"
-          class="page-item"
-          :class="{ active: p === page }"
-        >
-          <button class="page-link" @click="changePage(p)">{{ p }}</button>
+        <li class="page-item disabled">
+          <span class="page-link">{{ pagina }} di {{ pagineTotali }}</span>
         </li>
-        <li class="page-item" :class="{ disabled: page >= totalPages }">
-          <button class="page-link" @click="changePage(page + 1)">&raquo;</button>
+        <li class="page-item" :class="{ disabled: pagina === pagineTotali }">
+          <button class="page-link" @click="cambiaPagina(pagina + 1)">Successiva</button>
         </li>
       </ul>
     </nav>
 
-    <p class="text-muted small">
-      Totale: {{ total }} righe
-      <span class="badge bg-primary ms-2">
-        <i class="bi bi-clock me-1"></i>{{ oreTotali }} h totali
-      </span>
-    </p>
-
-    <!-- Form Modal -->
-    <RigaRapportinoFormModal
-      :show="showFormModal"
-      @close="showFormModal = false"
-      @saved="loadRighe"
+    <RapportinoFormModal
+      :show="mostraFormRapportino"
+      @close="mostraFormRapportino = false"
+      @saved="caricaRapportini"
     />
 
-    <!-- Nota Modal -->
+    <LavorazioneFormModal
+      :show="mostraFormLavorazione"
+      :rapportino="rapportinoAttivo"
+      :lavorazione="lavorazioneInModifica"
+      @close="mostraFormLavorazione = false"
+      @saved="onLavorazioneSalvata"
+    />
+
+    <RapportinoDettaglioModal
+      :show="mostraDettaglio"
+      :rapportino-id="dettaglioId"
+      @close="mostraDettaglio = false"
+      @modifica-lavorazione="apriModificaLavorazione"
+      @aggiungi-lavorazione="onDettaglioAggiungi"
+      @cambiato="caricaRapportini"
+    />
+
     <NotaLavorazioneFormModal
-      v-if="showNotaModal"
-      :show="showNotaModal"
-      :righe="selectedRighe"
-      @close="showNotaModal = false"
-      @saved="selectedIds = []; loadRighe()"
+      v-if="admin"
+      :show="mostraFormNota"
+      :rapportini="rapportiniSelezionati"
+      @close="mostraFormNota = false"
+      @saved="onNotaSalvata"
     />
   </div>
 </template>

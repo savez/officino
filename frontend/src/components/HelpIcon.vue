@@ -26,6 +26,6 @@ defineProps({
 }
 .help-icon:hover {
   opacity: 1;
-  color: #0d6efd !important;
+  color: var(--of-abete) !important;
 }
 </style>

@@ -221,7 +221,7 @@ exports.seed = async function (knex) {
     },
     {
       nome: 'Meccanica Rossi SRL',
-      telefono: '0461 567890',
+      telefono: '02 567890',
       partita_iva: '02345678901',
       email: 'info@meccanicarossi.it',
       indirizzo: 'Zona Industriale 5, Brescia',
@@ -234,7 +234,7 @@ exports.seed = async function (knex) {
       nome: 'Officina Demo SRL',
       partita_iva: '01234567890',
       indirizzo: 'Via dell\'Artigianato 12, 20100 Milano (MI)',
-      telefono: '0461 999888',
+      telefono: '02 999888',
       email: 'info@officinademo.it',
       aliquota_iva_default: 22,
     });
@@ -244,7 +244,7 @@ exports.seed = async function (knex) {
   const clientiAll = await knex('clienti').select('id', 'nome');
   const pezzi = await knex('pezzi_magazzino').select('id', 'nome');
 
-  const saverio = utenti.find((u) => u.nome === 'Admin Demo');
+  const admin = utenti.find((u) => u.nome === 'Admin Demo');
   const marco = utenti.find((u) => u.nome === 'Marco');
   const cliente1 = clientiAll[0];
   const cliente2 = clientiAll[1];
@@ -261,7 +261,7 @@ exports.seed = async function (knex) {
   // Righe rapportino — 3 gestite (associate alla nota), 2 aperte
   const righeData = [
     {
-      utente_id: saverio.id,
+      utente_id: admin.id,
       cliente_id: cliente1.id,
       giorno: '2026-03-07',
       ora_inizio: '08:00',
@@ -281,7 +281,7 @@ exports.seed = async function (knex) {
       nota_lavorazione_id: nota.id,
     },
     {
-      utente_id: saverio.id,
+      utente_id: admin.id,
       cliente_id: cliente1.id,
       giorno: '2026-03-08',
       ora_inizio: '14:00',
@@ -301,7 +301,7 @@ exports.seed = async function (knex) {
       nota_lavorazione_id: null,
     },
     {
-      utente_id: saverio.id,
+      utente_id: admin.id,
       cliente_id: cliente2.id,
       giorno: '2026-03-09',
       ora_inizio: '09:00',

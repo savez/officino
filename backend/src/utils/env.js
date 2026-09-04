@@ -12,9 +12,9 @@ const envSchema = z.object({
   // Database
   DB_HOST: z.string().default('localhost'),
   DB_PORT: z.coerce.number().default(5432),
-  DB_NAME: z.string().default('magazzino'),
-  DB_USER: z.string().default('magazzino_user'),
-  DB_PASSWORD: z.string().default('magazzino_pass'),
+  DB_NAME: z.string().default('officino'),
+  DB_USER: z.string().default('officino_user'),
+  DB_PASSWORD: z.string().default('officino_pass'),
 
   // JWT
   JWT_SECRET: z.string().min(8).default('dev-secret-change-in-production'),

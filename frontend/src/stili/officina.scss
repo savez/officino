@@ -1,0 +1,82 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// Il foglio di stile dell'officina.
+//
+// L'ORDINE È LA COSA CHE CONTA. Le variabili si definiscono PRIMA di importare
+// Bootstrap, così che le varianti dei componenti — .btn-primary, .badge, le
+// tabelle — nascano già col nostro colore. Definite dopo non avrebbero alcun
+// effetto: quelle varianti hanno i propri valori fissati in compilazione, e
+// sovrascrivere --bs-primary non le segue. Si otterrebbe un'applicazione col
+// colore nuovo e i pulsanti vecchi.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// 1 · I caratteri, ospitati nel progetto. Nessun CDN: aggiungerebbe una
+//     dipendenza di rete a un'applicazione usata in un capannone.
+//     Solo il sottoinsieme latino e quattro pesi: 96 kB contro i 120 che
+//     servirebbero prendendoli tutti.
+@import '@fontsource/barlow/latin-400.css';
+@import '@fontsource/barlow/latin-600.css';
+@import '@fontsource/barlow/latin-700.css';
+@import '@fontsource/barlow-condensed/latin-700.css';
+
+// 2 · I nostri token.
+@import 'token';
+
+// 3 · Le variabili di Bootstrap, riscritte con i nostri valori.
+$primary: $of-abete;
+$danger: $of-allarme;
+$secondary: $of-ardesia;
+
+// ATTENZIONE alla scelta di $warning. Mapparlo sull'ottone sembrava naturale —
+// e' l'unico giallo della palette — ma l'ottone significa «rapportino aperto».
+// Il risultato: badge marroni sulle ore mancanti, cioe' il colore di uno stato
+// finito dove non c'entra nulla. La regola «un colore, un significato» l'aveva
+// rotta questa riga.
+//
+// Gli avvisi si esprimono quindi per FORMA e non per tinta: fondo neutro, testo
+// forte, un filo a sinistra. E' anche il trattamento adottato nel pannello
+// delle ore mancanti, cosi' l'applicazione dice «attenzione» in un modo solo.
+$warning: $of-tenue;
+
+// $success resta l'abete. Non e' una collisione ma una coincidenza voluta:
+// primario, «concluso» e «riuscito» sono la stessa idea.
+$success: $of-abete;
+
+$body-bg: $of-carta;
+$body-color: $of-inchiostro;
+
+// Il testo attenuato e' $of-tenue MISURATO (7,53:1), non una trasparenza sul
+// nero. I default di Bootstrap sono alfa sul colore del corpo, e sulla nostra
+// carta il terziario — rgba($body-color, .5) — cade a 3,19:1: sotto la soglia
+// AA di 4,5:1. Nessuno lo usa oggi, ed e' esattamente per questo che va fissato
+// adesso, prima che qualcuno lo usi credendolo leggibile.
+$body-secondary-color: $of-tenue;
+$body-tertiary-color: $of-tenue;
+$border-color: $of-bordo;
+$border-radius: $of-raggio;
+$border-radius-sm: $of-raggio;
+$border-radius-lg: $of-raggio;
+$border-radius-xl: $of-raggio;
+$border-radius-pill: $of-raggio;
+
+$font-family-sans-serif: $of-testo;
+$font-family-base: $of-testo;
+$headings-font-family: $of-display;
+$headings-font-weight: 700;
+
+// Aree toccabili: i comandi nascono già abbastanza grandi per un pollice,
+// invece di essere allargati caso per caso.
+$input-btn-padding-y: 0.7rem;
+$input-btn-padding-x: 1.1rem;
+$input-btn-font-size: 1rem;
+
+// Bootstrap rifiuta accoppiate che non raggiungono questo rapporto: alzarlo
+// significa che una variante illeggibile fallisce in compilazione invece che
+// in produzione.
+$min-contrast-ratio: 4.5;
+
+// 4 · Bootstrap.
+@import 'bootstrap/scss/bootstrap';
+
+// 5 · Ciò che è nostro, dopo, così da non combattere con la specificità della
+//     libreria ma da aggiungersi.
+@import 'componenti';

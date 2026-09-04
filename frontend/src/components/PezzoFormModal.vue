@@ -2,6 +2,7 @@
 import { ref, watch, computed } from 'vue'
 import { createProdotto, updateProdotto } from '../services/catalogo'
 import HelpTooltip from './HelpTooltip.vue'
+import BarcodeScannerModal from './BarcodeScannerModal.vue'
 
 const props = defineProps({
   show: { type: Boolean, default: false },
@@ -17,6 +18,20 @@ const title = computed(() => (isEdit.value ? 'Modifica Prodotto' : 'Nuovo Prodot
 const form = ref(emptyForm())
 const errors = ref({})
 const saving = ref(false)
+const showScanner = ref(false)
+
+/**
+ * Handle a successful barcode scan. Silently overwrites the current
+ * value of `form.barcode` (per spec acceptance scenario 3).
+ *
+ * @param {string} code Decoded barcode string from the scanner modal
+ */
+function onBarcodeScanned(code) {
+  showScanner.value = false
+  if (code) {
+    form.value.barcode = code
+  }
+}
 
 function emptyForm() {
   return {
@@ -132,14 +147,26 @@ async function onSubmit() {
                   Barcode
                   <HelpTooltip text="Codice a barre EAN-13 o QR del prodotto. Usa 'Scansiona Barcode' per leggerlo con la fotocamera. Permette di trovare il prodotto rapidamente senza digitare." />
                 </label>
-                <input
-                  v-model="form.barcode"
-                  type="text"
-                  class="form-control"
-                  :class="{ 'is-invalid': errors.barcode }"
-                  placeholder="Codice a barre"
-                />
-                <div v-if="errors.barcode" class="invalid-feedback">{{ errors.barcode }}</div>
+                <div class="input-group">
+                  <input
+                    v-model="form.barcode"
+                    type="text"
+                    class="form-control"
+                    :class="{ 'is-invalid': errors.barcode }"
+                    placeholder="Codice a barre"
+                    data-testid="barcode-input"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    title="Scansiona barcode"
+                    data-testid="barcode-scan-btn"
+                    @click="showScanner = true"
+                  >
+                    <i class="bi bi-upc-scan"></i>
+                  </button>
+                  <div v-if="errors.barcode" class="invalid-feedback">{{ errors.barcode }}</div>
+                </div>
               </div>
 
               <!-- Nome -->
@@ -244,5 +271,12 @@ async function onSubmit() {
         </form>
       </div>
     </div>
+
+    <!-- Barcode Scanner Modal -->
+    <BarcodeScannerModal
+      :show="showScanner"
+      @close="showScanner = false"
+      @scanned="onBarcodeScanned"
+    />
   </div>
 </template>

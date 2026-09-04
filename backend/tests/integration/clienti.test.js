@@ -1,11 +1,14 @@
-const { getApp, getAuthToken } = require('../helpers/setup');
+const { getApp, getAdminToken } = require('../helpers/setup');
 
 let app;
 let token;
 
 beforeAll(async () => {
   app = getApp();
-  token = await getAuthToken();
+  // Token amministratore: la scrittura sull'anagrafica clienti e' riservata
+  // (feature 013). Questo file verifica il comportamento degli endpoint, non i
+  // permessi: quelli stanno in permessi-ruolo.test.js.
+  token = await getAdminToken();
 });
 
 /**
@@ -45,7 +48,7 @@ describe('POST /api/clienti', () => {
   it('should create a new cliente with all fields', async () => {
     const { res, body } = await createCliente({
       nome: 'Luigi Verdi',
-      telefono: '0461123456',
+      telefono: '02123456',
       email: 'luigi@example.com',
       indirizzo: 'Via Roma 1, Milano',
       codice_fiscale: 'VRDLGU80A01L378X',
@@ -56,9 +59,9 @@ describe('POST /api/clienti', () => {
     expect(res.statusCode).toBe(201);
     expect(body).toHaveProperty('id');
     expect(body.nome).toBe('Luigi Verdi');
-    expect(body.telefono).toBe('0461123456');
+    expect(body.telefono).toBe('02123456');
     expect(body.email).toBe('luigi@example.com');
-    expect(body.indirizzo).toBe('Via Roma 1, Trento');
+    expect(body.indirizzo).toBe('Via Roma 1, Milano');
     expect(body.codice_fiscale).toBe('VRDLGU80A01L378X');
     expect(body.partita_iva).toBe('01234567890');
     expect(body.note).toBe('Cliente importante');
@@ -354,12 +357,12 @@ describe('GET /api/clienti/search', () => {
   });
 
   it('should search by telefono', async () => {
-    await createCliente({ nome: 'Con Tel', telefono: '0461999888' });
+    await createCliente({ nome: 'Con Tel', telefono: '02999888' });
     await createCliente({ nome: 'Senza Tel' });
 
     const res = await app.inject({
       method: 'GET',
-      url: '/api/clienti/search?q=0461999',
+      url: '/api/clienti/search?q=02999',
       headers: { authorization: `Bearer ${token}` },
     });
 
@@ -771,7 +774,7 @@ describe('DELETE /api/clienti/:id', () => {
     const { body: created } = await createCliente({ nome: 'Con Preventivo' });
 
     // Insert a linked preventivo directly with all required fields
-    const utenteRow = await app.db('utenti').where({ email: 'marco@officina.it' }).first();
+    const utenteRow = await app.db('utenti').where({ email: 'operaio@officino.app' }).first();
     await app.db('preventivi').insert({
       numero: 'TEST/001',
       cliente_id: created.id,

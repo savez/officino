@@ -1,0 +1,6 @@
+# esbuild e @parcel/watcher installano un binario tramite script di post-install.
+# Senza questa approvazione esplicita pnpm 10+ interrompe `pnpm install`, e di
+# conseguenza ogni comando che ci passa attraverso — `pnpm test` incluso.
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true

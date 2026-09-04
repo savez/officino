@@ -160,7 +160,7 @@ describe('generaPdfPreventivo', () => {
       nome: 'Officina Meccanica Rossi',
       partita_iva: '01234567890',
       indirizzo: 'Via Roma 1, 20100 Milano',
-      telefono: '+39 0461 123456',
+      telefono: '+39 02 123456',
       email: 'info@officinarossi.it',
       logo_url: null, // no logo file in tests
       aliquota_iva_default: 22,

@@ -17,6 +17,10 @@ const form = ref(emptyForm())
 const errors = ref({})
 const saving = ref(false)
 
+/**
+ * Build an empty utente form object.
+ * @returns {{ nome: string, email: string, password: string, ruolo: string, costo_orario: number }}
+ */
 function emptyForm() {
   return {
     nome: '',
@@ -44,9 +48,14 @@ watch(
         form.value = emptyForm()
       }
     }
-  }
+  },
+  { immediate: true }
 )
 
+/**
+ * Validate the current form state and populate `errors`.
+ * @returns {boolean} true when there are no validation errors.
+ */
 function validate() {
   const errs = {}
   if (!form.value.nome?.trim()) errs.nome = 'Il nome è obbligatorio.'
@@ -64,6 +73,11 @@ function validate() {
   return Object.keys(errs).length === 0
 }
 
+/**
+ * Submit the form: builds the payload (including admin-managed
+ * `costo_orario` per US3 of feature 010) and calls create/update.
+ * @returns {Promise<void>}
+ */
 async function onSubmit() {
   if (!validate()) return
 
@@ -204,6 +218,7 @@ async function onSubmit() {
                     min="0"
                     class="form-control"
                     :class="{ 'is-invalid': errors.costo_orario }"
+                    data-testid="utente-costo-orario"
                   />
                   <div v-if="errors.costo_orario" class="invalid-feedback">{{ errors.costo_orario }}</div>
                 </div>

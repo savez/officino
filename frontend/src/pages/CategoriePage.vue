@@ -152,7 +152,30 @@ onMounted(() => {
     </div>
 
     <!-- Table -->
-    <div v-else class="table-responsive">
+    <div v-else-if="categorie.length === 0" class="of-vuoto">
+      <p class="mb-2">Nessuna categoria.</p>
+      <p class="mb-0 small">Le categorie servono a raggruppare i prodotti del catalogo.</p>
+    </div>
+
+    <div v-else class="d-lg-none">
+      <article v-for="cat in categorie" :key="`scheda-${cat.id}`" class="of-targhetta">
+        <div class="of-targhetta__corpo">
+          <h3 class="of-targhetta__macchina">{{ cat.nome }}</h3>
+          <p class="of-targhetta__meta mb-0">{{ cat.descrizione || 'Senza descrizione' }}</p>
+
+          <div class="d-flex flex-column gap-2 mt-3">
+            <button class="btn btn-primary of-azione-primaria" @click="openEdit(cat)">
+              Modifica categoria
+            </button>
+            <button class="btn btn-outline-danger of-azione-secondaria mt-2" @click="onDelete(cat)">
+              Elimina categoria
+            </button>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div v-if="categorie.length > 0" class="d-none d-lg-block table-responsive">
       <table class="table table-striped table-hover align-middle">
         <thead class="table-dark">
           <tr>
