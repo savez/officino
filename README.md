@@ -37,7 +37,18 @@ workflow.
 |---|---|
 | Settings → Pages → Source | **GitHub Actions** (`build_type: workflow`). Con «Deploy from a branch» il workflow carica un artefatto che non viene mai pubblicato, e non fallisce: passa in verde senza pubblicare nulla |
 | Environment `github-pages` → deployment branches | deve includere **`landing`**. Alla creazione conteneva solo `main`, e il primo deploy passò per bypass da admin, non perché fosse permesso |
-| Ruleset `landing` | blocca `deletion`, `non_fast_forward`, `update`, con bypass al ruolo admin. Solo il proprietario può pushare qui |
+| Ruleset `landing` | blocca `deletion` e `non_fast_forward`, **senza bypass per nessuno**. Non serve a tenere fuori gli altri — a quello basta essere l'unico collaboratore — ma a impedire che il proprietario cancelli o riavvolga il branch per sbaglio |
+
+Due cose imparate configurandolo, entrambe controintuitive:
+
+- **`update` fra le regole blocca anche il proprietario.** Serve a vietare i
+  push diretti, ma un repo di utente non ha ruoli assegnati: l'owner ha l'admin
+  implicito, quindi il bypass su `RepositoryRole: admin` non lo copre e il push
+  torna `Cannot update this protected ref`.
+- **Con quel bypass attivo le regole non vincolavano nulla.** Un force-push e una
+  cancellazione passavano entrambi, annunciati da `Bypassed rule violations`. Le
+  regole mordono solo da quando `bypass_actors` è vuoto: ora `deletion` e
+  `non_fast_forward` sono rifiutati, mentre un push in avanti passa.
 
 ```bash
 gh api repos/savez/officino/pages --jq .build_type                                  # workflow
