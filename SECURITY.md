@@ -46,7 +46,7 @@ Best-effort, è un progetto personale open source:
 - `main` è protetto: si modifica solo attraverso una pull request
 
 I test di integrazione del backend non girano in CI — sei suite falliscono per
-motivi preesistenti, descritti nella issue dei difetti noti. Non riguardano
+motivi preesistenti, descritti nella [issue dei difetti noti](https://github.com/savez/officino/issues/7). Non riguardano
 autenticazione né permessi, che sono coperti dai test unitari e da
 `permessi-ruolo`, `permessi-rapportino` e `utenti-rbac`, tutte verdi.
 
