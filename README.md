@@ -27,6 +27,24 @@ misurati e verificati da un test. L'unico scostamento è la coda del gradiente
 dell'eroe, `#1a6449` invece del `#1c6b50` del banner, perché su quel verde il
 testo secondario scendeva a 4,35:1.
 
+## Impostazioni del repo, che nessun file registra
+
+Il deploy dipende da tre cose che vivono nelle impostazioni di GitHub e non nel
+codice. Se un giorno il sito smette di pubblicarsi, si guarda qui prima che nel
+workflow.
+
+| Dove | Valore |
+|---|---|
+| Settings → Pages → Source | **GitHub Actions** (`build_type: workflow`). Con «Deploy from a branch» il workflow carica un artefatto che non viene mai pubblicato, e non fallisce: passa in verde senza pubblicare nulla |
+| Environment `github-pages` → deployment branches | deve includere **`landing`**. Alla creazione conteneva solo `main`, e il primo deploy passò per bypass da admin, non perché fosse permesso |
+| Ruleset `landing` | blocca `deletion`, `non_fast_forward`, `update`, con bypass al ruolo admin. Solo il proprietario può pushare qui |
+
+```bash
+gh api repos/savez/officino/pages --jq .build_type                                  # workflow
+gh api repos/savez/officino/environments/github-pages/deployment-branch-policies \
+  --jq '.branch_policies[].name'                                                    # landing, main
+```
+
 ## Come si modifica
 
 ```bash
