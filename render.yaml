@@ -42,9 +42,22 @@ services:
       - type: rewrite
         source: /api/*
         destination: https://<YOUR_BACKEND_URL>/api/*
-       - type: rewrite
-         source: /uploads/*
-         destination: https://<YOUR_BACKEND_URL>/uploads/*
+      - type: rewrite
+        source: /uploads/*
+        destination: https://<YOUR_BACKEND_URL>/uploads/*
+      # Ogni altro percorso va servito da index.html: le rotte come /rapportini
+      # o /dashboard esistono solo nel router del browser, non come file. Senza
+      # questa regola aprirle direttamente — da segnalibro, da link condiviso o
+      # ricaricando la pagina — restituisce 404, mentre navigandoci dall'interno
+      # funzionano: e' il router a gestirle e il server non viene interrogato.
+      #
+      # Non intercetta /assets/*: Render serve i file che esistono PRIMA di
+      # applicare le riscritture. Sta in fondo perche' l'ordine di valutazione
+      # non e' documentato, e cosi' /api/* e /uploads/* restano al sicuro in
+      # ogni caso.
+      - type: rewrite
+        source: /*
+        destination: /index.html
     envVars:
       - key: VITE_API_BASE_URL
         value: /api

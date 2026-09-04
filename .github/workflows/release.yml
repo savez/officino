@@ -33,7 +33,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          # semantic-release 25 richiede Node >= 22.14: con la 20 fallisce
+          # all'avvio, senza pubblicare la release ne' aggiornare il CHANGELOG.
+          #
+          # E' la versione con cui gira lo strumento di rilascio, non quella
+          # dell'applicazione: il backend resta su Node 20 (vedi i Dockerfile).
+          node-version: '22'
           cache: 'pnpm'
 
       - name: Install root dependencies

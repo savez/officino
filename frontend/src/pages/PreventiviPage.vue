@@ -1,5 +1,6 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
+import BloccoFiltri from '../components/BloccoFiltri.vue';
 import { useRouter } from 'vue-router';
 import AppPagination from '../components/AppPagination.vue';
 import PreventivoFormModal from '../components/PreventivoFormModal.vue';
@@ -27,6 +28,9 @@ const error = ref('');
 // Filters
 const searchQuery = ref('');
 const statoFilter = ref('');
+const filtriAttivi = computed(
+  () => [searchQuery.value, statoFilter.value].filter(Boolean).length,
+);
 
 // Modals
 const showFormModal = ref(false);
@@ -345,35 +349,36 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Toolbar -->
-    <div class="row g-2 mb-3">
-      <!-- Search -->
-      <div class="col-12 col-md-5">
-        <form @submit.prevent="onSearch" class="input-group">
-          <input
-            v-model="searchQuery"
-            type="text"
-            class="form-control"
-            placeholder="Cerca per numero o nome cliente..."
-            @input="onSearchInput"
-          />
-          <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
-        </form>
-      </div>
+    <BloccoFiltri :attivi="filtriAttivi">
+      <div class="row g-2 align-items-end">
+        <!-- Search -->
+        <div class="col-12 col-md-5">
+          <form @submit.prevent="onSearch" class="input-group">
+            <input
+              v-model="searchQuery"
+              type="text"
+              class="form-control"
+              placeholder="Cerca per numero o nome cliente..."
+              @input="onSearchInput"
+            />
+            <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
+          </form>
+        </div>
 
-      <!-- Stato filter -->
-      <div class="col-6 col-md-3">
-        <select v-model="statoFilter" class="form-select">
-          <option value="">Tutti gli stati</option>
-          <option value="bozza">Bozza</option>
-          <option value="approvato">Approvato</option>
-          <option value="rifiutato">Rifiutato</option>
-          <option value="scaduto">Scaduto</option>
-          <option value="fatturato">Fatturato</option>
-          <option value="cancellato">Cancellato</option>
-        </select>
+        <!-- Stato filter -->
+        <div class="col-6 col-md-3">
+          <select v-model="statoFilter" class="form-select">
+            <option value="">Tutti gli stati</option>
+            <option value="bozza">Bozza</option>
+            <option value="approvato">Approvato</option>
+            <option value="rifiutato">Rifiutato</option>
+            <option value="scaduto">Scaduto</option>
+            <option value="fatturato">Fatturato</option>
+            <option value="cancellato">Cancellato</option>
+          </select>
+        </div>
       </div>
-    </div>
+    </BloccoFiltri>
 
     <!-- Success -->
     <div v-if="successMessage" class="alert alert-success alert-dismissible fade show">

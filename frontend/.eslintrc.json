@@ -1,0 +1,14 @@
+{
+  "env": { "browser": true, "es2022": true },
+  "parserOptions": { "ecmaVersion": 2022, "sourceType": "module" },
+  "extends": ["eslint:recommended", "plugin:vue/recommended", "plugin:jsdoc/recommended", "prettier"],
+  "plugins": ["vue", "jsdoc"],
+  "rules": {
+    "no-console": ["warn", { "allow": ["error", "warn"] }],
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "vue/multi-word-component-names": "off",
+    "jsdoc/require-jsdoc": "off",
+    "jsdoc/require-param-description": "off",
+    "jsdoc/require-returns-description": "off"
+  }
+}

@@ -26,7 +26,6 @@ function formatDate(dateStr) {
 
 /**
  * Generates a PDF buffer for a preventivo.
- *
  * @param {object} preventivo - Full preventivo with pezzi and client info
  * @param {object} impostazioni - Officina settings (nome, piva, indirizzo, etc.)
  * @returns {Promise<Buffer>}

@@ -24,9 +24,13 @@ const routes = [
     component: () => import('../pages/CategoriePage.vue'),
   },
   {
+    // La pagina e' riservata: l'anagrafica clienti la gestisce l'amministratore.
+    // Le API di LETTURA restano invece aperte, perche' la tendina dei
+    // rapportini ne ha bisogno.
     path: '/clienti',
     name: 'Clienti',
     component: () => import('../pages/ClientiPage.vue'),
+    meta: { requiresAdmin: true },
   },
   {
     path: '/preventivi',
@@ -77,6 +81,18 @@ const routes = [
     name: 'Guida',
     component: () => import('../pages/GuidaPage.vue'),
   },
+  // Rotta di riserva, in fondo per forza: deve essere l'ultima a essere provata.
+  //
+  // Serve da quando il sito statico riscrive ogni percorso su index.html: prima
+  // un indirizzo inesistente riceveva un 404 dal server, ora arriva fin qui.
+  // Senza questa rotta il router non troverebbe corrispondenza e non
+  // renderizzerebbe nulla — una pagina bianca, che e' peggio di un errore
+  // perche' non dice cosa e' successo.
+  {
+    path: '/:percorsoNonTrovato(.*)*',
+    name: 'NonTrovata',
+    component: () => import('../pages/NotFoundPage.vue'),
+  },
 ];
 
 const router = createRouter({
@@ -101,5 +117,11 @@ router.beforeEach((to, from, next) => {
 
   next();
 });
+
+// Esportato oltre al router perche' la guida deve poter sapere quali aree
+// siano riservate. Prima manteneva un proprio elenco: tre fonti di verita' —
+// router, menu e guida — che nessuno confrontava, e infatti la guida e' rimasta
+// indietro quando i permessi sono cambiati.
+export { routes };
 
 export default router;

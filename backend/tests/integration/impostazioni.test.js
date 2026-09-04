@@ -78,8 +78,8 @@ describe('PUT /api/impostazioni', () => {
         nome: 'Officina Aggiornata',
         partita_iva: '01234567890',
         indirizzo: 'Via Test 1, Milano',
-        telefono: '0461123456',
-        email: 'test@officina.it',
+        telefono: '02123456',
+        email: 'test@officino.app',
         aliquota_iva_default: 10,
       },
     });
@@ -88,9 +88,9 @@ describe('PUT /api/impostazioni', () => {
     const body = JSON.parse(res.body);
     expect(body.nome).toBe('Officina Aggiornata');
     expect(body.partita_iva).toBe('01234567890');
-    expect(body.indirizzo).toBe('Via Test 1, Trento');
-    expect(body.telefono).toBe('0461123456');
-    expect(body.email).toBe('test@officina.it');
+    expect(body.indirizzo).toBe('Via Test 1, Milano');
+    expect(body.telefono).toBe('02123456');
+    expect(body.email).toBe('test@officino.app');
     expect(Number(body.aliquota_iva_default)).toBe(10);
   });
 

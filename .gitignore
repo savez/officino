@@ -140,3 +140,6 @@ vite.config.ts.timestamp-*
 .pnpm-store/
 .claude/
 uploads/logo/
+
+# Specifiche di progetto: restano nella repo di sviluppo
+specs/

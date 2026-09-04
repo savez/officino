@@ -1,7 +1,6 @@
 /**
  * Centralized calculation service for preventivi.
  * All amounts are VAT-excluded. IVA is applied on the net total.
- *
  * @module services/calcolo-preventivo
  */
 
@@ -16,7 +15,6 @@ function round2(n) {
 
 /**
  * Calculates all derived fields for a preventivo.
- *
  * @param {object} params
  * @param {Array<{ quantita: number, prezzo_unitario: number }>} params.pezzi - line items
  * @param {number} params.manodopera_ore - labor hours

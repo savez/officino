@@ -1,4 +1,4 @@
-.PHONY: dev-backend dev-frontend dev-all prod prod-down migrate migrate-rollback seed test test-unit lint lint-fix build logs db-shell
+.PHONY: dev-backend dev-frontend dev-all prod prod-down migrate migrate-rollback seed test test-backend test-frontend test-unit lint lint-fix build logs db-shell
 
 # === Development (inside Dev Container) ===
 
@@ -37,8 +37,16 @@ db-shell:
 
 # === Testing & Linting ===
 
-test:
+# Esegue ENTRAMBE le suite. Il target eseguiva solo il backend, e per questo i
+# test del frontend — che esistono da tempo — non venivano mai lanciati: hanno
+# smesso di passare senza che nessuno se ne accorgesse.
+test: test-backend test-frontend
+
+test-backend:
 	cd backend && pnpm test
+
+test-frontend:
+	cd frontend && pnpm test
 
 test-unit:
 	cd backend && pnpm test -- --testPathPattern='tests/unit'

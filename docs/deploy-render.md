@@ -1,6 +1,6 @@
 # Deploy su Render.com
 
-Guida per pubblicare Magazzino Trentino su Render.com (piano free) con database esterno su Neon.tech.
+Guida per pubblicare Officino su Render.com (piano free) con database esterno su Neon.tech.
 
 ## Architettura
 
@@ -10,8 +10,8 @@ Browser
   ▼
 [Render Static Site - Frankfurt]       ← Frontend Vue 3 (dist/)
   ├── /* → index.html (SPA)
-  ├── /api/* → rewrite a magazzino-api
-  └── /uploads/* → rewrite a magazzino-api
+  ├── /api/* → rewrite a officino-api
+  └── /uploads/* → rewrite a officino-api
         │
         ▼
 [Render Web Service - Frankfurt]       ← Backend Fastify (Node 20)
@@ -34,9 +34,9 @@ Browser
 > Il Postgres free di Render scade dopo 30 giorni. Neon.tech offre 0.5 GB gratis senza scadenza.
 
 1. Creare account su [neon.tech](https://neon.tech)
-2. Nuovo progetto: `magazzino-trentino`
+2. Nuovo progetto: `officino`
 3. Region: **EU (Frankfurt)**
-4. Database: `magazzino`
+4. Database: `officino`
 5. Copiare il **DATABASE_URL** (connection string con `?sslmode=require`)
 
 ## 2. Deploy via Blueprint
@@ -48,8 +48,8 @@ Browser
 
 | Variabile | Servizio | Valore |
 |---|---|---|
-| `DATABASE_URL` | magazzino-api | Connection string Neon |
-| `CORS_ORIGIN` | magazzino-api | `https://magazzino-frontend.onrender.com` |
+| `DATABASE_URL` | officino-api | Connection string Neon |
+| `CORS_ORIGIN` | officino-api | `<YOUR_FRONTEND_URL>` |
 
 5. Cliccare **Apply** → il deploy parte automaticamente
 
@@ -59,9 +59,9 @@ Il seed viene eseguito automaticamente al primo avvio tramite `seed-if-empty.js`
 
 ## 4. Verifica
 
-1. Visitare `https://magazzino-frontend.onrender.com`
+1. Visitare `<YOUR_FRONTEND_URL>`
 2. Il primo caricamento è lento (~1 min per il cold start del backend)
-3. Login: `admin@officina.it` / `admin123`
+3. Login: `demo@officino.app` / `admin123`
 4. Verificare:
    - Impostazioni → caricare un logo → deve persistere dopo refresh
    - Preventivi → generare un PDF → il logo deve apparire
@@ -80,7 +80,7 @@ Il seed viene eseguito automaticamente al primo avvio tramite `seed-if-empty.js`
 | `JWT_EXPIRES_IN` | `15m` | Impostato in render.yaml |
 | `JWT_REFRESH_EXPIRES_IN` | `7d` | Impostato in render.yaml |
 | `LOG_LEVEL` | `warn` | Impostato in render.yaml |
-| `CORS_ORIGIN` | `https://magazzino-frontend.onrender.com` | Da impostare manualmente |
+| `CORS_ORIGIN` | `<YOUR_FRONTEND_URL>` | Da impostare manualmente |
 
 ### Frontend (Static Site)
 
@@ -97,6 +97,6 @@ Il seed viene eseguito automaticamente al primo avvio tramite `seed-if-empty.js`
 
 ## Dominio personalizzato (opzionale)
 
-1. Render Dashboard → `magazzino-frontend` → **Settings → Custom Domains**
+1. Render Dashboard → `officino-frontend` → **Settings → Custom Domains**
 2. Aggiungere il dominio e configurare il DNS (CNAME)
 3. Aggiornare `CORS_ORIGIN` sul backend con il nuovo dominio

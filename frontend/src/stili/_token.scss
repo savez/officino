@@ -1,0 +1,93 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// Token dell'officina — direzione «targhetta di servizio»
+//
+// Ogni valore qui è stato MISURATO contro il proprio fondo, non stimato. Tre
+// colori proposti a occhio erano sbagliati e solo la misura li ha trovati:
+// l'ottone stava a 3,55:1 (insufficiente perfino come testo corrente), i bordi
+// a 1,21:1 (contro i 3:1 che servono perché un confine si veda), il testo
+// secondario appena sotto la soglia critica.
+//
+// I rapporti nei commenti sono contro `carta`. Il controllo automatico in
+// tests/stili/token.test.js li ricalcola: se qualcuno cambia un valore senza
+// misurarlo, quel test lo ferma.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ── Colore ─────────────────────────────────────────────────────────────────
+$of-carta: #f6f7f5; // fondo della pagina
+$of-superficie: #ffffff; // schede, modali, righe
+$of-inchiostro: #16211c; // 15,41:1 — testo principale, numeri
+$of-tenue: #465349; // 7,53:1 — testo secondario, etichette
+$of-bordo: #7e8b83; // 3,31:1 — confini che portano significato
+$of-filo: #c4ccc6; // 1,53:1 — separatori decorativi, MAI un confine
+$of-abete: #14503c; // 8,71:1 — primario, e stato «concluso»
+$of-ottone: #8a5209; // 5,94:1 — stato «aperto». NON porta testo critico
+$of-ardesia: #3c4e60; // 7,97:1 — stato «in nota di lavorazione»
+$of-allarme: #96190f; // 8,00:1 — solo azioni distruttive
+
+// ── Il marchio ─────────────────────────────────────────────────────────────
+// L'arancione dell'insegna «Officino», che NON appartiene alla palette
+// dell'interfaccia. È qui perché anche il marchio deve avere un solo posto in
+// cui è definito, non perché sia un colore utilizzabile.
+//
+// Va detto: non si accorda con la direzione scelta — è arancione accanto a un
+// verde abete, e ha gli angoli arrotondati dove tutto il resto li ha vivi.
+// Adeguarlo sarebbe ridisegnare l'insegna, che è una decisione di chi possiede
+// l'officina e non una conseguenza di questa revisione.
+$of-marchio: #f97316;
+
+// ── Tipografia ─────────────────────────────────────────────────────────────
+// Una superfamiglia in due larghezze: i numeri delle ore stanno sulla stessa
+// riga dei nomi macchina, e farli venire da famiglie estranee si vedrebbe.
+$of-display: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif;
+$of-testo: 'Barlow', system-ui, -apple-system, sans-serif;
+
+$of-ore: 2.4rem; // il numerale sulla scheda
+$of-ore-riga: 1.05rem; // le ore in tabella
+$of-macchina: 1.32rem;
+$of-titolo: 1.5rem;
+$of-corpo: 1rem;
+$of-meta: 0.82rem;
+$of-etichetta: 0.72rem;
+
+// ── Spazio e forma ─────────────────────────────────────────────────────────
+$of-passo: 0.25rem;
+$of-raggio: 0; // angoli vivi: una targhetta non li ha arrotondati
+$of-bordo-stato: 8px;
+$of-tocco: 48px;
+$of-tocco-primario: 56px;
+
+// ── Soglia fra le due impaginazioni ────────────────────────────────────────
+// Sotto: schede. Sopra: tabella. Nessuna interpolazione fra le due.
+$of-soglia: 992px;
+
+// ── Gli stessi valori come variabili CSS ───────────────────────────────────
+// I componenti del progetto usano queste, non i nomi di Bootstrap: se un
+// giorno la libreria cambiasse, non ne risentirebbero.
+:root {
+  --of-carta: #{$of-carta};
+  --of-superficie: #{$of-superficie};
+  --of-inchiostro: #{$of-inchiostro};
+  --of-tenue: #{$of-tenue};
+  --of-bordo: #{$of-bordo};
+  --of-filo: #{$of-filo};
+  --of-abete: #{$of-abete};
+  --of-ottone: #{$of-ottone};
+  --of-ardesia: #{$of-ardesia};
+  --of-allarme: #{$of-allarme};
+
+  --of-marchio: #{$of-marchio};
+
+  --of-display: #{$of-display};
+  --of-testo: #{$of-testo};
+
+  --of-ore: #{$of-ore};
+  --of-ore-riga: #{$of-ore-riga};
+  --of-macchina: #{$of-macchina};
+  --of-titolo: #{$of-titolo};
+  --of-meta: #{$of-meta};
+  --of-etichetta: #{$of-etichetta};
+
+  --of-bordo-stato: #{$of-bordo-stato};
+  --of-tocco: #{$of-tocco};
+  --of-tocco-primario: #{$of-tocco-primario};
+}

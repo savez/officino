@@ -15,7 +15,20 @@ const showScanner = ref(false)
 const showManualForm = ref(false)
 const manualNome = ref('')
 const manualQuantita = ref(1)
+const manualPrezzo = ref(0)
 let debounceTimer = null
+
+/**
+ * Normalize a numeric input (string or number) to a non-negative Number
+ * rounded to 2 decimals. Used for prezzo_unitario.
+ * @param {string|number} v
+ * @returns {number}
+ */
+function toMoney(v) {
+  const n = Number(v)
+  if (!Number.isFinite(n) || n < 0) return 0
+  return Math.round(n * 100) / 100
+}
 
 async function onSearch() {
   const term = searchTerm.value.trim()
@@ -48,6 +61,8 @@ function addMateriale(pezzo) {
     )
     emit('update:materiali', updated)
   } else {
+    // Prefill prezzo_unitario from catalogo prezzo_vendita.
+    // Snapshot — remains editable per-row, independent from future catalogo edits.
     emit('update:materiali', [
       ...props.materiali,
       {
@@ -55,6 +70,7 @@ function addMateriale(pezzo) {
         nome: pezzo.nome,
         quantita: 1,
         fuori_catalogo: false,
+        prezzo_unitario: toMoney(pezzo.prezzo_vendita ?? 0),
       },
     ])
   }
@@ -64,6 +80,8 @@ function addMateriale(pezzo) {
 
 function addManuale() {
   if (!manualNome.value.trim()) return
+  // Fuori catalogo accepts a manually entered prezzo_unitario,
+  // default 0 (admin may complete it later in nota di lavorazione).
   emit('update:materiali', [
     ...props.materiali,
     {
@@ -71,10 +89,12 @@ function addManuale() {
       nome: manualNome.value.trim(),
       quantita: manualQuantita.value || 1,
       fuori_catalogo: true,
+      prezzo_unitario: toMoney(manualPrezzo.value),
     },
   ])
   manualNome.value = ''
   manualQuantita.value = 1
+  manualPrezzo.value = 0
   showManualForm.value = false
 }
 
@@ -87,6 +107,18 @@ function removeMateriale(index) {
 function updateQuantita(index, qty) {
   const val = Math.max(1, parseInt(qty) || 1)
   const updated = props.materiali.map((m, i) => (i === index ? { ...m, quantita: val } : m))
+  emit('update:materiali', updated)
+}
+
+/**
+ * Update prezzo_unitario of a materiale at index, emitting the new array.
+ * Coerced to >= 0 with 2 decimals.
+ * @param {number} index
+ * @param {string|number} prezzo
+ */
+function updatePrezzo(index, prezzo) {
+  const val = toMoney(prezzo)
+  const updated = props.materiali.map((m, i) => (i === index ? { ...m, prezzo_unitario: val } : m))
   emit('update:materiali', updated)
 }
 
@@ -163,6 +195,7 @@ async function onBarcodeScanned(code) {
             type="text"
             class="form-control form-control-sm"
             placeholder="Nome prodotto"
+            data-testid="manual-nome-input"
           />
         </div>
         <div class="col-3">
@@ -172,10 +205,31 @@ async function onBarcodeScanned(code) {
             class="form-control form-control-sm"
             min="1"
             placeholder="Qtà"
+            data-testid="manual-quantita-input"
           />
         </div>
+        <div class="col-3">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text">&euro;</span>
+            <input
+              v-model.number="manualPrezzo"
+              type="number"
+              class="form-control"
+              min="0"
+              step="0.01"
+              placeholder="Prezzo"
+              data-testid="manual-prezzo-input"
+            />
+          </div>
+        </div>
         <div class="col-auto">
-          <button type="button" class="btn btn-sm btn-primary" @click="addManuale" :disabled="!manualNome.trim()">
+          <button
+            type="button"
+            class="btn btn-sm btn-primary"
+            data-testid="manual-add-btn"
+            @click="addManuale"
+            :disabled="!manualNome.trim()"
+          >
             Aggiungi
           </button>
         </div>
@@ -189,6 +243,7 @@ async function onBarcodeScanned(code) {
           <tr>
             <th>Materiale</th>
             <th style="width: 80px">Qtà</th>
+            <th style="width: 120px">Prezzo unit. (&euro;)</th>
             <th style="width: 40px"></th>
           </tr>
         </thead>
@@ -205,6 +260,17 @@ async function onBarcodeScanned(code) {
                 :value="mat.quantita"
                 min="1"
                 @input="updateQuantita(index, $event.target.value)"
+              />
+            </td>
+            <td>
+              <input
+                type="number"
+                class="form-control form-control-sm"
+                :value="mat.prezzo_unitario ?? 0"
+                min="0"
+                step="0.01"
+                :data-testid="`prezzo-input-${index}`"
+                @input="updatePrezzo(index, $event.target.value)"
               />
             </td>
             <td class="text-center">

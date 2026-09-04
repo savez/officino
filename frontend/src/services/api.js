@@ -10,7 +10,7 @@ export const coldStartMessage = ref('');
 const api = axios.create({
   baseURL: API_BASE,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 240_000, // 4 minuti — timeout generoso per server con cold start (es. hosting gratuito)
+  timeout: 240_000, // 4 minuti — il piano free di Render ha cold start ~60s
 });
 
 // Attach JWT token to every request
@@ -90,5 +90,20 @@ export async function fetchPaginated(url, params = {}) {
   const { data } = await api.get(url, { params });
   return data;
 }
+
+/**
+ * Input shape for a single materiale inside a riga di rapportino payload.
+ * Kept in sync with what `POST /api/rapportini` accepts on the backend.
+ *
+ * @typedef {Object} MaterialeInput
+ * @property {number} [pezzo_id]        Catalogo product id (omit when fuori_catalogo)
+ * @property {string} [nome_manuale]    Free-text name (required when fuori_catalogo)
+ * @property {number} quantita          Integer >= 1
+ * @property {boolean} fuori_catalogo   true = manual / off-catalog
+ * @property {number} [prezzo_unitario] Snapshot price per unit (>= 0, 2 decimals).
+ *                                     For catalogo items: prefilled by frontend from
+ *                                     `catalogo_prodotti.prezzo_vendita` (editable).
+ *                                     For fuori catalogo: editable, default 0.
+ */
 
 export default api;
