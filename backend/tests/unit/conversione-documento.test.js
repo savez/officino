@@ -80,8 +80,8 @@ const rapportini = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FR-036 non chiede soltanto che le note gia' emesse restino stampabili: chiede
-// che il documento NON CAMBI ASPETTO. Una ristampa non deve dire al cliente
+// Non basta che le note gia' emesse restino stampabili: il documento NON DEVE
+// CAMBIARE ASPETTO. Una ristampa non deve dire al cliente
 // qualcosa che l'originale non diceva.
 //
 // `documento-prima.json` e' il testo del PDF catturato PRIMA della modifica.
@@ -139,9 +139,9 @@ describe('una nota convertita dal modello precedente non cambia aspetto', () => 
     expect(dopo).not.toMatch(/€\/h|tariffa/i);
   });
 
-  // Lo spazio per la firma era l'unica aggiunta della feature 022. Ritirato su
-  // richiesta il 2026-09-04, il documento torna a coincidere con il precedente
-  // anche su questo punto: nessuna delle due versioni lo riporta.
+  // Lo spazio per la firma era stato valutato e poi scartato: il documento
+  // torna a coincidere con il precedente anche su questo punto, e nessuna
+  // delle due versioni lo riporta.
   it('nessuno spazio per la firma, in nessuna delle due versioni', () => {
     expect(prima).not.toMatch(/firma/i);
     expect(dopo).not.toMatch(/firma/i);

@@ -61,8 +61,8 @@ describe('la dashboard non conta piu i preventivi', () => {
   })
 
   it('non chiede al server dati sui preventivi', async () => {
-    // Toglierli dalla schermata lasciando la lettura sarebbe il costo invisibile
-    // che FR-004 vieta: qui si verifica che la pagina non ne dipenda piu'.
+    // Toglierli dalla schermata lasciando la lettura sarebbe un costo
+    // invisibile: qui si verifica che la pagina non ne dipenda piu'.
     const w = await monta(true)
     expect(JSON.stringify(w.html())).not.toMatch(/preventiv/i)
   })

@@ -74,8 +74,8 @@ function validate() {
 }
 
 /**
- * Submit the form: builds the payload (including admin-managed
- * `costo_orario` per US3 of feature 010) and calls create/update.
+ * Submit the form: builds the payload (including the admin-managed
+ * `costo_orario`) and calls create/update.
  * @returns {Promise<void>}
  */
 async function onSubmit() {

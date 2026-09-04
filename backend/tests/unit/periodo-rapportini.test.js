@@ -85,8 +85,8 @@ describe('le due varianti del criterio di periodo', () => {
   });
 
   it('entrambe includono un rapportino a cavallo del periodo', async () => {
-    // Gennaio-marzo compare anche filtrando febbraio: e' la lettura scelta da
-    // FR-021, e vale per la misura come per l'elenco.
+    // Gennaio-marzo compare anche filtrando febbraio: e' la lettura scelta,
+    // e vale per la misura come per l'elenco.
     const id = await creaRapportino(['2026-01-20', '2026-03-05', '2026-05-01']);
     expect(await idsCon((q) => applicaPeriodoElenco(q, PERIODO))).toEqual([id]);
     expect(await idsCon((q) => applicaPeriodoConteggio(q, PERIODO))).toEqual([id]);
@@ -130,7 +130,7 @@ describe('i rapportini senza lavorazioni', () => {
   });
 });
 
-describe("l'invariante che tiene insieme dashboard ed elenco (FR-014c)", () => {
+describe("l'invariante che tiene insieme dashboard ed elenco", () => {
   it('conteggio + senza lavorazioni = elenco, su un insieme misto', async () => {
     await creaRapportino(['2026-03-05']); // dentro
     await creaRapportino(['2026-03-20']); // dentro

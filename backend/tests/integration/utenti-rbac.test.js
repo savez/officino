@@ -94,10 +94,10 @@ describe('Utenti RBAC — admin ammesso (T011)', () => {
 });
 
 // ----------------------------------------------------------------
-// Feature 010 — costo_orario su /api/utenti (FR-024)
+// costo_orario su /api/utenti
 // ----------------------------------------------------------------
 
-describe('Utenti /api/utenti — costo_orario (feature 010, FR-024)', () => {
+describe('Utenti /api/utenti — costo_orario', () => {
   it('POST utente con costo_orario come admin → persistito', async () => {
     const email = `costo-${Date.now()}@officino.app`;
     const res = await app.inject({

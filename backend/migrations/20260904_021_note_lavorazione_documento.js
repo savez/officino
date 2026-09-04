@@ -1,5 +1,5 @@
 /**
- * Feature 022 — La nota di lavorazione diventa un documento con una propria
+ * La nota di lavorazione diventa un documento con una propria
  * data di riferimento, due dettagli indipendenti, totali imponibili per sezione
  * e la possibilità di dividere per macchinario.
  *
@@ -25,8 +25,7 @@ exports.up = async function (knex) {
 
   // ── Conversione delle note esistenti ──────────────────────────────────────
   //
-  // FR-036 non chiede soltanto che restino stampabili: chiede che il documento
-  // NON CAMBI ASPETTO. Le tre scelte che contano sono qui sotto, e vanno lette
+  // Non basta che restino stampabili: il documento NON DEVE CAMBIARE ASPETTO. Le tre scelte che contano sono qui sotto, e vanno lette
   // PRIMA di eliminare le colonne vecchie.
   const esistenti = await knex('note_lavorazione').select(
     'id',
@@ -58,8 +57,8 @@ exports.up = async function (knex) {
 
         // VERO, ed e' la riga meno ovvia. Il testo delle note esistenti e' stato
         // scritto a mano: marcarlo automatico lo esporrebbe a essere
-        // rigenerato al primo cambio di selezione, che e' esattamente cio' che
-        // FR-011 esiste per impedire.
+        // rigenerato al primo cambio di selezione, che e' esattamente cio'
+        // che si vuole impedire.
         riassunto_personalizzato: true,
       });
   }

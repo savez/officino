@@ -64,7 +64,7 @@ describe('individuazione dei giorni sotto soglia', () => {
   });
 });
 
-// FR-016: sabato e domenica non sono mai giorni scoperti, qualunque cosa
+// Sabato e domenica non sono mai giorni scoperti, qualunque cosa
 // contengano.
 describe('fine settimana', () => {
   it('il sabato non è mai segnalato, nemmeno con zero ore', () => {
@@ -104,7 +104,7 @@ describe('fine settimana', () => {
   });
 });
 
-// FR-017: segnalare un giorno non ancora arrivato sarebbe un rimprovero per
+// Segnalare un giorno non ancora arrivato sarebbe un rimprovero per
 // non aver fatto ciò che non si poteva fare.
 describe('giorni futuri', () => {
   it('i giorni successivi a oggi non sono segnalati', () => {
@@ -134,7 +134,7 @@ describe('giorni futuri', () => {
   });
 });
 
-// FR-019: un giorno con 5 ore è un'ora dimenticata, un giorno con 0 ore è
+// Un giorno con 5 ore è un'ora dimenticata, un giorno con 0 ore è
 // quasi sempre un'assenza. Senza distinguerli, ad agosto il pannello
 // elencherebbe ogni giorno di ferie di ogni operaio.
 describe('giorno vuoto e giorno parziale', () => {

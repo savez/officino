@@ -92,9 +92,8 @@ export async function fetchPaginated(url, params = {}) {
 }
 
 /**
- * Input shape for a single materiale inside a riga di rapportino payload
- * (feature 010 — costi materiali). Mirror of `MaterialeInput` in
- * `specs/010-rapportini-note-costi/contracts/rapportini.openapi.yml`.
+ * Input shape for a single materiale inside a riga di rapportino payload.
+ * Kept in sync with what `POST /api/rapportini` accepts on the backend.
  *
  * @typedef {Object} MaterialeInput
  * @property {number} [pezzo_id]        Catalogo product id (omit when fuori_catalogo)

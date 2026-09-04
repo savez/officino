@@ -11,7 +11,7 @@ vi.mock('../../src/services/utenti', () => ({
   updateUtente: (...args) => updateUtente(...args),
 }))
 
-describe('UtenteFormModal — costo_orario (feature 010 / US3)', () => {
+describe('UtenteFormModal — costo_orario', () => {
   beforeEach(() => {
     createUtente.mockClear()
     updateUtente.mockClear()

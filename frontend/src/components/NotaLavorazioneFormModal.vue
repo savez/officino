@@ -373,9 +373,8 @@ watch(
 )
 
 /**
- * Submit handler: builds the create/update payload according to
- * il contratto della feature 022 (data di riferimento, due interruttori,
- * modifiche_costi[]) and calls the appropriate service.
+ * Submit handler: builds the create/update payload (data di riferimento, due
+ * interruttori, modifiche_costi[]) and calls the appropriate service.
  * @returns {Promise<void>}
  */
 async function onSubmit() {
@@ -465,7 +464,7 @@ async function onSubmit() {
               <strong>{{ oreTotali }}h</strong> totali
             </div>
 
-            <!-- Costi panel (US5) -->
+            <!-- Costi panel -->
             <div class="mb-3" data-testid="nota-costi-panel">
               <label class="form-label">Dettaglio costi righe</label>
               <div

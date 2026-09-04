@@ -20,7 +20,7 @@ async function clientiRoutes(app) {
   // La scrittura sull'anagrafica clienti e' riservata all'amministratore. La
   // LETTURA resta aperta di proposito: cliente_id e' obbligatorio su ogni riga
   // di rapportino e la pagina carica l'elenco per popolare la tendina, quindi
-  // toglierla renderebbe i rapportini inutilizzabili (FR-001).
+  // toglierla renderebbe i rapportini inutilizzabili.
   const adminOnly = [app.authenticate, app.requireRole('admin')];
 
   app.get('/', { preHandler: [app.authenticate] }, async (request) => {

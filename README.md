@@ -1,256 +1,176 @@
-# 🔧 Officino
+# Officino
 
-**Gestione completa per officine meccaniche** - sistema web production-ready per tracciamento ore, preventivi, catalogo prodotti e reportistica.
+Gestionale per officine meccaniche: si registra il lavoro svolto, se ne misura
+il costo e se ne ricava un documento da consegnare al cliente.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js](https://img.shields.io/badge/Node.js-v20-green)](https://nodejs.org)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue)](https://www.postgresql.org)
-[![Vue.js](https://img.shields.io/badge/Vue.js-3-brightgreen)](https://vuejs.org)
+[![Licenza: MIT](https://img.shields.io/badge/Licenza-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![Node 20](https://img.shields.io/badge/Node-20-green)
+![PostgreSQL 15](https://img.shields.io/badge/PostgreSQL-15-blue)
+![Vue 3](https://img.shields.io/badge/Vue-3-brightgreen)
 
----
+## Come funziona
 
-## ✨ Caratteristiche
+Il pezzo centrale è il **rapportino**: un contenitore delle lavorazioni che un
+operaio ha svolto **su un solo macchinario per un solo cliente**. Dentro ci
+finiscono le singole lavorazioni, con le ore e i materiali impiegati.
 
-### 📊 Dashboard & Analytics
-- **Dashboard intuitiva** con KPI in tempo reale
-- **Grafici interattivi** per ore lavorate per operaio/cliente
-- **Export Excel** con dettagli operazioni
+Un rapportino attraversa tre stati:
 
-### 📋 Rapportini (Timesheets)
-- Registrazione ore giornaliere per operaio e cliente
-- **Badge ore filtrate** per tracking rapido
-- Associazione materiali e note lavoro
-- Gestione stato righe (aperta/gestita)
+| Stato | Significato |
+|---|---|
+| `aperto` | ci si sta ancora lavorando, l'operaio può modificarlo |
+| `chiuso` | l'operaio lo dichiara concluso |
+| `gestito` | è confluito in una nota di lavorazione |
 
-### 💰 Preventivi
-- Generazione automatica numeri progressivi
-- Composizione flessibile (pezzi + manodopera + sconto)
-- **PDF professionali** con logo officina
-- Ciclo di vita completo (bozza → approvato → fatturato)
-- Import/export JSON per backup e trasferimenti
+Lo stato **non è una colonna**: si deriva da `chiuso_il` e da
+`nota_lavorazione_id`. Una colonna scritta accanto a quei due campi
+rappresenterebbe due volte lo stesso fatto, e basterebbe un endpoint che
+aggiorna l'una e non l'altra per avere un rapportino gestito senza nota. Con la
+derivazione la contraddizione non è rappresentabile.
 
-### 📦 Catalogo Prodotti
-- Gestione ricambi e materiali
-- Barcode scanning (EAN-13/QR)
-- Categorie personalizzabili
-- Filtri e ricerca avanzata
-- Export Excel catalogo
+I rapportini chiusi confluiscono in una **nota di lavorazione**, il documento
+che va al cliente: raccoglie le lavorazioni di un periodo, ne calcola i totali e
+produce un PDF. Prima di stampare, un controllo di coerenza segnala le note che
+non tornano — righe con costo orario a zero, materiali senza prezzo — e chiede
+conferma esplicita per procedere.
 
-### 👥 Gestione Utenti
-- Ruoli (operaio, admin)
-- Costo orario personalizzato per operaio
-- Log audit di tutte le modifiche
-- Autenticazione JWT sicura
+## Cosa c'è
 
-### 🔐 Note di Lavorazione
-- Raccolta righe rapportino per cliente
-- Generazione PDF riepilogativo
-- Supporto fatturazione
+**Rapportini** — registrazione delle ore per macchinario e cliente, materiali
+con prezzo unitario, costo orario per riga, filtri per periodo, avviso in caso
+di rapportino duplicato, PDF del singolo rapportino.
 
----
+**Note di lavorazione** — costruite dai rapportini chiusi, con data di
+riferimento propria, riassunto delle lavorazioni composto dal server,
+possibilità di correggere i costi, unione o divisione per macchinario, e un PDF
+con dettagli di manodopera e materiali attivabili separatamente.
 
-## 🚀 Quick Start
+**Dashboard** — misura il lavoro svolto, non i preventivi. Metriche distinte per
+ruolo, ore per operaio e per cliente, pannello dei giorni con ore mancanti
+(feriali sotto le 8 ore), filtri per periodo. Una invariante tiene insieme le
+due viste: il totale della dashboard coincide sempre con quello dell'elenco
+rapportini per lo stesso periodo.
 
-### Prerequisiti
-- **Node.js** 20+
-- **pnpm** (o npm/yarn)
-- **PostgreSQL** 15+ (o SQLite per sviluppo)
-- **Docker** (opzionale, per deployment)
+**Preventivi** — numerazione progressiva automatica, composizione con pezzi a
+catalogo e fuori catalogo, manodopera e sconto, ciclo bozza → approvato →
+fatturato, PDF con il logo dell'officina.
 
-### Sviluppo Locale
+**Magazzino e catalogo** — due sezioni distinte: le giacenze da una parte, il
+catalogo dei ricambi dall'altra, con categorie, ricerca, lettura di codici a
+barre (EAN-13 e QR) ed export Excel.
 
-#### 1. Clone il repo
+**Clienti, utenti e permessi** — due ruoli, `user` e `admin`. Sono riservate
+agli admin cinque sezioni: clienti, note di lavorazione, utenti, impostazioni e
+registro modifiche. Dashboard, rapportini, preventivi e catalogo restano
+accessibili a tutti, e ogni operaio vede e modifica i propri rapportini. Ogni
+modifica finisce in un registro consultabile.
+
+**Guida integrata** — descritta nell'applicazione e allineata ai permessi di chi
+la legge. Alcuni test verificano proprio questo: che la guida descriva il
+comportamento reale invece di determinarlo, così una divergenza fra le due si
+vede subito.
+
+## Avvio rapido
+
+Serve Node 20+, pnpm e PostgreSQL 15+ (Docker è comodo ma non obbligatorio).
+
 ```bash
 git clone https://github.com/savez/officino.git
 cd officino
+
+cp .env.example .env          # rivedere le credenziali del database
+
+cd backend  && pnpm install && cd ..
+cd frontend && pnpm install && cd ..
+
+cd backend && pnpm migrate && pnpm seed && cd ..
 ```
 
-#### 2. Installa dipendenze
+Poi, in due terminali:
+
 ```bash
-pnpm install
-cd backend && pnpm install && cd ../frontend && pnpm install && cd ..
+make dev-backend              # API su :3000
+make dev-frontend             # interfaccia su :5173
 ```
 
-#### 3. Setup database
+L'applicazione risponde su **http://localhost:5173**. I dati di esempio creano
+due utenze:
+
+| Ruolo | Email | Password |
+|---|---|---|
+| admin | `demo@officino.app` | `admin123` |
+| operaio | `operaio@officino.app` | `admin123` |
+
+Sono credenziali di dimostrazione: vanno cambiate prima di qualunque uso reale,
+insieme a `JWT_SECRET` nel `.env`.
+
+## Comandi
+
 ```bash
-# Crea file .env (vedi .env.example)
-cp .env.example .env
-
-# Avvia PostgreSQL (o configuralo nel .env)
-# Esegui migrazioni
-cd backend && pnpm migrate
+make dev-backend       # API in sviluppo
+make dev-frontend      # interfaccia in sviluppo
+make migrate           # applica le migrazioni
+make seed              # carica i dati di esempio
+make test              # esegue entrambe le suite
+make lint              # backend e frontend
+make build             # build di produzione del frontend
+make prod              # stack completo con Docker Compose
+make db-shell          # psql sul database
 ```
 
-#### 4. Seed database (opzionale)
+## Stack
+
+**Backend** — Fastify, PostgreSQL (SQLite in memoria per i test), Knex per query
+e migrazioni, JWT per l'autenticazione, PDFKit per i documenti, Zod per la
+validazione, Jest per i test.
+
+**Frontend** — Vue 3 con Vite, Bootstrap 5 compilato dai sorgenti con un proprio
+sistema di token, Chart.js per i grafici, html5-qrcode per i codici a barre,
+Vitest per i test.
+
+**Infrastruttura** — Docker e Docker Compose, dev container pronto per VS Code,
+GitHub Actions con semantic-release.
+
+## Deploy
+
+C'è una guida per [Render.com](./docs/deploy-render.md), con `render.yaml` già
+predisposto. Gli indirizzi da compilare sono marcati `<YOUR_BACKEND_URL>` e
+`<YOUR_FRONTEND_URL>`.
+
+Per un deploy con Docker:
+
 ```bash
-cd backend && pnpm seed
+make prod              # oppure: docker compose -f docker/docker-compose.prod.yml up -d --build
 ```
 
-#### 5. Avvia dev server
+Il seed parte da solo al primo avvio se il database è vuoto
+(`backend/src/seed-if-empty.js`).
+
+## Test
+
 ```bash
-# Terminal 1: Backend
-cd backend && pnpm dev
-
-# Terminal 2: Frontend
-cd frontend && pnpm dev
+make test              # entrambe le suite
 ```
 
-Visita **http://localhost:5173**
+Il backend gira su SQLite in memoria, quindi i test non richiedono un database
+attivo. Il frontend usa Vitest con jsdom.
 
-### Credenziali Demo
-```
-Email: demo@officino.app
-Password: admin123
-```
+> **Nota onesta sullo stato attuale:** sei suite di integrazione del backend
+> falliscono. Cercano la tabella `pezzi_magazzino`, rinominata in `catalogo` da
+> una migrazione, e non sono mai state aggiornate. Ci sono anche due errori di
+> lint in `backend/src/services/log-modifiche.js`. Sono problemi noti e
+> circoscritti, non toccano il codice in esercizio, e sono un buon punto di
+> partenza per un primo contributo.
 
----
+## Contribuire
 
-## 📦 Stack Tecnologico
+Le pull request sono benvenute. Il progetto usa
+[Conventional Commits](https://www.conventionalcommits.org/) — `feat:`, `fix:`,
+`docs:`, `refactor:`, `test:`, `chore:` — perché la versione la calcola
+semantic-release dai messaggi di commit.
 
-### Backend
-- **Fastify** - Framework HTTP ultrarapido
-- **PostgreSQL / SQLite** - Database relazionale
-- **Knex.js** - Query builder & migrazioni
-- **Jest** - Testing framework
-- **JWT** - Autenticazione sicura
+Prima di aprire una PR conviene far girare `make test` e `make lint`.
 
-### Frontend
-- **Vue.js 3** - Framework reattivo
-- **Vite** - Build tool ultraveloce
-- **Bootstrap 5** - Componenti UI
-- **Chart.js** - Grafici interattivi
-- **Vitest** - Testing framework
-- **Axios** - Client HTTP
+## Licenza
 
-### DevOps
-- **Docker** - Containerizzazione
-- **Docker Compose** - Orchestrazione locale
-- **GitHub Actions** - CI/CD (Semantic Release)
-- **Render** - Deployment (example guide)
-
----
-
-## 🐳 Docker (Produzione)
-
-### Build e avvia con Docker Compose
-```bash
-make prod
-```
-
-Oppure:
-```bash
-docker-compose -f docker/docker-compose.prod.yml up --build -d
-```
-
-Frontend: **http://localhost**  
-Backend API: **http://localhost:3000/api**
-
----
-
-## 🧪 Testing
-
-### Backend
-```bash
-cd backend
-pnpm test                # Tutti i test
-pnpm test:watch         # Watch mode
-pnpm test -- --testPathPattern=integration  # Solo integration tests
-```
-
-### Frontend
-```bash
-cd frontend
-pnpm test               # Tutti i test
-pnpm test:watch        # Watch mode
-```
-
----
-
-## 📚 Documentazione
-
-### Guida Utente
-Disponibile nell'applicazione: **Guida → Officino**
-
-Copertine principali:
-- **Dashboard** - KPI e analitiche
-- **Rapportini** - Timesheets
-- **Preventivi** - Gestione offerte
-- **Catalogo** - Gestione ricambi
-- **Utenti** - Ruoli e permessi
-
-### Deploy
-
-#### Con Render.com
-Vedi [docs/deploy-render.md](./docs/deploy-render.md) per guida step-by-step
-
-#### Con Docker locale
-```bash
-docker-compose -f docker/docker-compose.prod.yml up -d
-```
-
-#### Build manuale
-```bash
-# Backend
-npm run build
-
-# Frontend
-cd frontend && pnpm build
-```
-
----
-
-## 🤝 Contributing
-
-Contributi sono benvenuti! 
-
-1. **Fork** il repository
-2. Crea un **feature branch** (`git checkout -b feature/amazing-feature`)
-3. Commit dei tuoi **cambiamenti** (`git commit -m 'feat: add amazing feature'`)
-4. **Push** al branch (`git push origin feature/amazing-feature`)
-5. Apri una **Pull Request**
-
-### Convenzioni Commit
-Usiamo [Conventional Commits](https://www.conventionalcommits.org/) per versionamento automatico.
-
-Prefissi comuni:
-- `feat:` - Nuova feature
-- `fix:` - Bug fix
-- `docs:` - Documentazione
-- `refactor:` - Refactoring
-- `test:` - Test
-- `chore:` - Maintenance
-
----
-
-## 📝 Licenza
-
-MIT License - vedi [LICENSE](./LICENSE)
-
----
-
-## 🎯 Roadmap
-
-- [ ] Integrazione email per notifiche
-- [ ] Fatturazione automatica
-- [ ] App mobile
-- [ ] Sincronizzazione con gestionali
-- [ ] Multi-lingua (EN/IT)
-- [ ] Dark mode
-
----
-
-## 💬 Support
-
-- **Issues** - Segnala bug o richiedi feature
-- **Discussions** - Domande e suggerimenti
-- **Email** - (aggiungi contatto se pubblico)
-
----
-
-## 🙏 Ringraziamenti
-
-Costruito con ❤️ per le officine che meritano strumenti moderni.
-
-**Versione:** 1.1.0  
-**Ultima build:** 2026  
-**Status:** Production Ready ✅
+MIT — vedi [LICENSE](./LICENSE).

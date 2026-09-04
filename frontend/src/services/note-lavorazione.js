@@ -48,7 +48,7 @@ export async function cancellaNota(id) {
 }
 
 /**
- * Pre-PDF warnings (FR-066/FR-067): elenco righe con costo orario 0 e
+ * Pre-PDF warnings: elenco righe con costo orario 0 e
  * materiali con prezzo 0 sulla nota. Il frontend deve chiamarlo prima di
  * `stampaNota` e, in presenza di warning, chiedere conferma esplicita.
  *

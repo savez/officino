@@ -11,8 +11,7 @@ const guida = leggi('../GuidaPage.vue');
 const paginaRapportini = leggi('../RapportiniPage.vue');
 const modaleLavorazione = leggi('../../components/LavorazioneFormModal.vue');
 
-// La feature 018 ha fissato una regola: la guida descrive il comportamento, non
-// lo determina. Se una delle due si muove senza l'altra, e' la guida a essere
+// La regola e' questa: la guida descrive il comportamento, non lo determina. Se una delle due si muove senza l'altra, e' la guida a essere
 // sbagliata — ma nessuno se ne accorge finche' qualcuno non va a cercare quello
 // che ha letto.
 //

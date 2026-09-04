@@ -101,7 +101,7 @@ describe('intervallo esplicito', () => {
   });
 });
 
-// FR-006: senza limite un intervallo di anni caricherebbe tutte le righe
+// Senza limite un intervallo di anni caricherebbe tutte le righe
 // storiche in memoria, perche' l'aggregazione avviene lato applicazione.
 describe('ampiezza massima', () => {
   it('accetta un intervallo esattamente al limite', () => {
@@ -129,7 +129,7 @@ describe('ampiezza massima', () => {
   });
 });
 
-// FR-004: all'apertura la dashboard mostra qualcosa senza chiedere nulla.
+// All'apertura la dashboard mostra qualcosa senza chiedere nulla.
 describe('periodo predefinito', () => {
   it('propone il mese corrente', () => {
     expect(periodoPredefinito(OGGI)).toEqual({ da: '2026-07-01', a: '2026-07-31' });

@@ -28,7 +28,7 @@ const editRighe = ref([])
 const detailNota = ref(null)
 const loadingDetail = ref(false)
 
-// PDF warning flow (FR-066/FR-067)
+// PDF warning flow
 const pdfWarningsData = ref({
   has_warnings: false,
   lavorazioni_costo_orario_zero: [],

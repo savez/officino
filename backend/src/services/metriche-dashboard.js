@@ -37,8 +37,9 @@ const round2 = (v) => Math.round(Number(v) * 100) / 100;
  * Conta i rapportini del periodo, per stato, piu' quelli privi di lavorazioni.
  *
  * I due insiemi sono disgiunti e la loro unione e' cio' che l'elenco dei
- * rapportini mostra per lo stesso periodo: e' l'invariante FR-014c, ed e' il
- * motivo per cui i predicati stanno in un modulo condiviso invece che qui.
+ * rapportini mostra per lo stesso periodo. E' l'invariante che tiene insieme
+ * le due viste, ed e' il motivo per cui i predicati stanno in un modulo
+ * condiviso invece che qui.
  * @param {import('knex').Knex} db
  * @param {{periodo: {da: string, a: string}, utenteId: number|null}} opzioni
  * @returns {Promise<ConteggiRapportini>}
@@ -95,7 +96,7 @@ async function misuraNote(db, { periodo, utenteId }) {
     // consente di aggiungerlo a una tabella esistente — quindi nei test una
     // nota senza data puo' esistere. Senza questa riga sarebbe `whereBetween` a
     // escluderla di rimbalzo, e l'esclusione sarebbe un effetto collaterale
-    // invece di una decisione (FR-017a).
+    // invece di una decisione.
     .whereNotNull('n.data_riferimento')
     .whereBetween('n.data_riferimento', [periodo.da, periodo.a]);
 

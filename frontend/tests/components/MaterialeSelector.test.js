@@ -45,7 +45,7 @@ async function triggerSearch(wrapper, term, results) {
   await flushPromises()
 }
 
-describe('MaterialeSelector — prezzo unitario (US1)', () => {
+describe('MaterialeSelector — prezzo unitario', () => {
   it('precompila prezzo_unitario con prezzo_vendita del catalogo dopo la selezione', async () => {
     vi.useFakeTimers()
     const wrapper = mount(MaterialeSelector, { props: { materiali: [] } })

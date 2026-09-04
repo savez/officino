@@ -2,8 +2,8 @@
  * Compone il riassunto precompilato di una nota di lavorazione a partire dalle
  * note che gli operai hanno scritto nelle singole lavorazioni.
  *
- * **Lo compone il server, non l'interfaccia.** FR-011 chiede di distinguere un
- * testo automatico da uno scritto a mano, per non sovrascrivere il secondo. Se
+ * **Lo compone il server, non l'interfaccia.** Un testo automatico va distinto
+ * da uno scritto a mano, per non sovrascrivere il secondo. Se
  * il testo lo generasse il client, il server saprebbe quale dei due ha in mano
  * solo perché il client glielo dice — e un client che sbaglia farebbe perdere
  * all'utente il proprio testo in silenzio. Generandolo qui, la distinzione si

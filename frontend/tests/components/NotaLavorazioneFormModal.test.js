@@ -75,7 +75,7 @@ function dettaglioDi(id) {
   }
 }
 
-describe('NotaLavorazioneFormModal — costi (feature 010 / US5)', () => {
+describe('NotaLavorazioneFormModal — costi', () => {
   beforeEach(() => {
     creaNota.mockClear()
     aggiornaNota.mockClear()

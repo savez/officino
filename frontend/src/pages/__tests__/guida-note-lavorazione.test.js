@@ -64,8 +64,8 @@ describe('la guida dice il vero sulle note di lavorazione', () => {
 
   it('non promette piu uno spazio per la firma, che il PDF non ha piu', () => {
     // Una guida che descrive un elemento inesistente manda a cercare qualcosa
-    // che non c'e' ed e' peggio di una guida incompleta: e' lo stesso difetto
-    // che la feature 018 era servita a togliere.
+    // che non c'e' ed e' peggio di una guida incompleta: e' esattamente il
+    // difetto che l'allineamento fra guida e comportamento serve a togliere.
     expect(sezione).not.toMatch(/firma/i);
   });
 

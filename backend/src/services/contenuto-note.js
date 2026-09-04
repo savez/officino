@@ -3,7 +3,7 @@
 /**
  * Caricamento del contenuto delle note di lavorazione.
  *
- * Il modulo nasce con la feature 024, ma non introduce comportamento: sposta
+ * Il modulo non introduce comportamento nuovo: sposta
  * qui il caricatore che stava nella rotta e gli affianca una variante in
  * BLOCCO, per piu' note in una volta.
  *

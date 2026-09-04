@@ -92,7 +92,7 @@ describe('Clienti: scrittura riservata all amministratore', () => {
   });
 });
 
-// FR-018: una restrizione di troppo e' un guasto tanto quanto una mancante, e
+// Una restrizione di troppo e' un guasto tanto quanto una mancante, e
 // senza questi test passerebbe inosservata finche' un operaio non riesce piu'
 // a compilare un rapportino.
 describe('Clienti: la lettura resta aperta, serve ai rapportini', () => {

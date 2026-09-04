@@ -38,7 +38,7 @@ const sampleNote = [
   { id: 1, cliente_id: 1, cliente_nome: 'A', testo: '', num_righe: 2, ore_totali: 5, created_at: '2026-05-19' },
 ]
 
-describe('NoteLavorazionePage — flusso PDF con warnings (US6)', () => {
+describe('NoteLavorazionePage — flusso PDF con warnings', () => {
   beforeEach(() => {
     getNote.mockReset().mockResolvedValue({ data: sampleNote, pagination: { totalPages: 1, total: 1 } })
     getPdfWarnings.mockReset()

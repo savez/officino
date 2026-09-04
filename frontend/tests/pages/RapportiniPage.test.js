@@ -124,7 +124,7 @@ describe('RapportiniPage — elenco per macchinario', () => {
     expect(celle.some((t) => t.includes('—'))).toBe(false)
   })
 
-  // FR-021: senza questa spiegazione un rapportino che copre gennaio e marzo,
+  // Senza questa spiegazione un rapportino che copre gennaio e marzo,
   // comparendo con il filtro di febbraio, sembra un errore.
   // La spiegazione e' passata da paragrafo a suggerimento su richiesta
   // dell'utente: da paragrafo occupava quattro righe in cima alla schermata del

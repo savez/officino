@@ -89,8 +89,8 @@ function areeProtetteDalRouter() {
 
 // Questo test esiste per un difetto reale: le aree riservate erano dichiarate
 // in tre posti — router, menu e guida — tenuti allineati solo dall'attenzione di
-// chi modificava. Quando la feature 013 ha riservato Clienti e Preventivi, menu
-// e router sono stati aggiornati e la guida no: un operaio leggeva istruzioni
+// chi modificava. Quando Clienti e Preventivi sono stati riservati agli admin,
+// menu e router sono stati aggiornati e la guida no: un operaio leggeva istruzioni
 // dettagliate per pagine che non poteva aprire.
 //
 // Né il build né il linter lo vedevano.
@@ -135,7 +135,7 @@ describe('divergenze note fra menu e router', () => {
   const menu = areeRiservateNelMenu();
   const router = areeProtetteDalRouter();
 
-  // Lacuna registrata nella feature 013, per scelta esplicita dell'utente:
+  // Lacuna nota e accettata consapevolmente:
   // la voce è nascosta dal menu ma la rotta non è protetta, quindi chi conosce
   // l'indirizzo ci arriva e l'API risponde. Nascondere riduce la probabilità
   // che accada per caso, non la possibilità che accada.

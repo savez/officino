@@ -496,7 +496,7 @@ async function noteLavorazioneRoutes(app) {
 
           // Dissociare significa azzerare SOLO il legame con la nota:
           // `chiuso_il` resta, quindi il rapportino torna in stato chiuso da
-          // sé, senza codice apposito (FR-016). Riportarlo ad aperto
+          // sé, senza codice apposito. Riportarlo ad aperto
           // richiederebbe una riapertura esplicita dell'amministratore.
           if (daRimuovere.length > 0) {
             await trx('rapportini')

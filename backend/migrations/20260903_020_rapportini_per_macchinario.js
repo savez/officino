@@ -1,13 +1,13 @@
 /**
- * Feature 019 — Il rapportino diventa il contenitore delle lavorazioni svolte da
+ * Il rapportino diventa il contenitore delle lavorazioni svolte da
  * un operaio su un solo macchinario per un solo cliente.
  *
  * È una modifica non retrocompatibile e i dati esistenti vengono ELIMINATI, per
- * scelta esplicita dell'utente (FR-031). Non esiste un percorso di conversione:
+ * scelta esplicita dell'utente. Non esiste un percorso di conversione:
  * le righe di rapportino odierne non vengono ricondotte a rapportini.
  *
  * Le tre azioni sono tenute separate e ciascuna dichiara quante righe ha
- * toccato (FR-032, FR-037). I conteggi sono letti PRIMA delle cancellazioni:
+ * toccato. I conteggi sono letti PRIMA delle cancellazioni:
  * letti dopo restituirebbero zero, e il registro direbbe "eliminate 0 righe"
  * mentre il database si svuota — il requisito rispettato alla lettera e inutile
  * nei fatti.
@@ -36,7 +36,7 @@ exports.up = async function (knex) {
 
   // ── Azione 2: di note_lavorazione si cancellano le RIGHE, non la tabella ──
   // La sua forma non cambia: mostra_dettagli e le opzioni PDF della migrazione
-  // 019 restano. FR-031 la elenca accanto alle altre due e sembra chiedere lo
+  // 019 restano. Elencata accanto alle altre due sembrerebbe chiedere lo
   // stesso trattamento; non è così.
   if (notePrima > 0) {
     await knex('note_lavorazione').del();
@@ -51,7 +51,7 @@ exports.up = async function (knex) {
 
     // Testo libero per scelta esplicita: nessuna anagrafica macchinari.
     // Conservato come l'operaio l'ha scritto — la normalizzazione serve al
-    // confronto per l'avviso duplicati, non alla memorizzazione (FR-024b).
+    // confronto per l'avviso duplicati, non alla memorizzazione.
     table.string('macchina').notNullable();
 
     // Lo stato NON è una colonna. Si deriva da questi due campi:
@@ -87,7 +87,7 @@ exports.up = async function (knex) {
       .onDelete('CASCADE');
     table.date('giorno').notNullable();
 
-    // Numero di ore al posto della fascia oraria (FR-004). decimal(5,2) regge
+    // Numero di ore al posto della fascia oraria. decimal(5,2) regge
     // fino a 999,99: è un tetto di memorizzazione, e come tale va respinto in
     // validazione con un 400 leggibile invece di arrivare qui e fallire con un
     // errore del driver.
@@ -97,7 +97,7 @@ exports.up = async function (knex) {
     // Fotografia del costo orario al momento della registrazione, sulla singola
     // lavorazione e non sul rapportino: un intervento può durare settimane, e
     // congelarlo alla creazione prezzerebbe tutto con la tariffa del primo
-    // giorno (FR-006a).
+    // giorno.
     table.decimal('costo_orario_applicato', 10, 2).notNullable().defaultTo(0);
     table.timestamps(true, true);
 

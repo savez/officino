@@ -71,7 +71,7 @@ async function seedRapportino(campi = {}) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-describe('US1 — creazione del contenitore e aggiunta di lavorazioni', () => {
+describe('creazione del contenitore e aggiunta di lavorazioni', () => {
   it('crea un rapportino aperto, senza lavorazioni', async () => {
     const res = await creaRapportino();
     expect(res.statusCode).toBe(201);
@@ -194,7 +194,7 @@ describe('US1 — creazione del contenitore e aggiunta di lavorazioni', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-describe('US1 — filtro per periodo', () => {
+describe('filtro per periodo', () => {
   // È la lettura scelta: un rapportino che copre gennaio e marzo compare
   // filtrando febbraio. Senza spiegazione a schermo sembra un errore, ma il
   // comportamento è voluto.
@@ -302,7 +302,7 @@ describe('US1 — filtro per periodo', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-describe('US1 — avviso di rapportino duplicato', () => {
+describe('avviso di rapportino duplicato', () => {
   it('avvisa a parità di nome esatto, senza impedire', async () => {
     await creaRapportino();
     const res = await creaRapportino();
@@ -345,7 +345,7 @@ describe('US1 — avviso di rapportino duplicato', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-describe('US1 — validazione delle ore', () => {
+describe('validazione delle ore', () => {
   let rapportinoId;
   beforeEach(async () => {
     rapportinoId = (await creaRapportino()).json().id;
@@ -377,7 +377,7 @@ describe('US1 — validazione delle ore', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-describe('US1 — costo orario', () => {
+describe('costo orario', () => {
   it("l'operaio non può imporlo: il valore inviato viene ignorato senza errore", async () => {
     const { id } = (await creaRapportino()).json();
     const res = await aggiungiLavorazione(id, userToken, { costo_orario_applicato: 999 });
@@ -423,7 +423,7 @@ describe('US1 — costo orario', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-describe('US1 — eliminazione del rapportino', () => {
+describe('eliminazione del rapportino', () => {
   // Senza questa via d'uscita un macchinario scritto male lascerebbe un
   // contenitore né concludibile né rimovibile.
   it("l'autore elimina un rapportino aperto e vuoto", async () => {

@@ -3,7 +3,7 @@
  * PdfWarningsModal — mostra all'admin l'elenco di righe e materiali con
  * valori a zero (costo orario o prezzo unitario) prima della generazione
  * del PDF della nota di lavorazione. L'utente deve confermare
- * esplicitamente per procedere (FR-066/FR-067).
+ * esplicitamente per procedere.
  */
 import { computed } from 'vue'
 

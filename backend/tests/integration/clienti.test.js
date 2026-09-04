@@ -6,7 +6,7 @@ let token;
 beforeAll(async () => {
   app = getApp();
   // Token amministratore: la scrittura sull'anagrafica clienti e' riservata
-  // (feature 013). Questo file verifica il comportamento degli endpoint, non i
+  //. Questo file verifica il comportamento degli endpoint, non i
   // permessi: quelli stanno in permessi-ruolo.test.js.
   token = await getAdminToken();
 });

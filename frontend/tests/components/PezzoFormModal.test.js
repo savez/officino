@@ -21,7 +21,7 @@ vi.mock('../../src/services/catalogo', () => ({
   updateProdotto: vi.fn(),
 }))
 
-describe('PezzoFormModal - barcode scanning (US7)', () => {
+describe('PezzoFormModal - barcode scanning', () => {
   it('mostra il pulsante di scansione barcode con icona bi-upc-scan', async () => {
     const wrapper = mount(PezzoFormModal, {
       props: { show: true, pezzo: null, categorie: [] },

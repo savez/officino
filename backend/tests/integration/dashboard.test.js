@@ -116,7 +116,7 @@ describe('GET /api/dashboard/stats - Autenticazione', () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 describe('GET /api/dashboard/stats - Validazione parametri', () => {
-  // FR-004: senza parametri la dashboard mostra il periodo predefinito invece
+  // Senza parametri la dashboard mostra il periodo predefinito invece
   // di rifiutare. Prima dei filtri per intervallo qui ci si aspettava un 400.
   it('2. senza parametri → 200 con il periodo predefinito', async () => {
     const { res, body } = await getStats({}, userToken);
@@ -147,7 +147,7 @@ describe('GET /api/dashboard/stats - Validazione parametri', () => {
     expect(res.statusCode).toBe(400);
   });
 
-  // FR-006: senza limite un intervallo di anni caricherebbe tutto lo storico
+  // Senza limite un intervallo di anni caricherebbe tutto lo storico
   // in memoria, perche' l'aggregazione avviene lato applicazione.
   it('7. intervallo troppo ampio → 400', async () => {
     const { res } = await getStats({ da: '2020-01-01', a: '2026-12-31' }, userToken);
@@ -297,7 +297,7 @@ describe('GET /api/dashboard/stats - Struttura risposta', () => {
     // Chiavi di primo livello
     expect(body).toHaveProperty('ore');
 
-    // La dashboard non misura piu' i preventivi (FR-001..FR-004): la chiave non
+    // La dashboard non misura piu' i preventivi: la chiave non
     // deve esserci. Non basta averla tolta dalla schermata — finche' la rotta la
     // produce, il sistema paga una lettura che nessuno mostra.
     expect(body).not.toHaveProperty('preventivi');
@@ -491,7 +491,7 @@ describe('GET /api/dashboard/stats - Filtro operaio', () => {
   });
 });
 
-// FR-013: e' il test che distingue un controllo reale dal nascondere un menu
+// E' il test che distingue un controllo reale dal nascondere un menu
 // nell'interfaccia. Il parametro non viene respinto, viene SOVRASCRITTO: un
 // parametro ignorato non puo' diventare una fuga di dati per una dimenticanza
 // in un ramo condizionale.
@@ -653,7 +653,7 @@ describe('GET /api/dashboard/stats - Ore mancanti', () => {
     expect(body.ore_mancanti.map((o) => o.utente_id)).toEqual([testUtenteId]);
   });
 
-  // FR-021: l'operaio vede i propri giorni come promemoria, mai quelli dei
+  // L'operaio vede i propri giorni come promemoria, mai quelli dei
   // colleghi.
   it('C5. il non-admin vede solo se stesso', async () => {
     await seedRigaRapportino({
@@ -698,7 +698,7 @@ describe('GET /api/dashboard/stats - Ore mancanti', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// ELENCO OPERAI — segnalato dall'utente il 2026-09-02: tendina vuota
+// ELENCO OPERAI — difetto gia' riscontrato: tendina vuota
 // ═══════════════════════════════════════════════════════════════════════════════
 
 describe('GET /api/dashboard/stats - Elenco operai selezionabili', () => {
@@ -780,7 +780,7 @@ describe("GET /api/dashboard/export-ore - contenuto del foglio", () => {
     return XLSX.utils.sheet_to_json(wb.Sheets.Dettaglio);
   }
 
-  // FR-029: e' un cambio visibile a chi usa il foglio, non un adeguamento
+  // E' un cambio visibile a chi usa il foglio, non un adeguamento
   // interno. La fascia oraria non viene piu' registrata.
   it('il foglio Dettaglio ha Ore al posto di Ora Inizio e Ora Fine', async () => {
     await seedRigaRapportino({ giorno: '2026-03-10', ore: 4.5 });
@@ -865,7 +865,7 @@ describe('GET /api/dashboard/export-ore - Export Excel (admin only)', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// METRICHE DEL LAVORO (feature 024)
+// METRICHE DEL LAVORO
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /**
@@ -950,8 +950,8 @@ describe('Metriche: conteggi dei rapportini', () => {
     expect(body.rapportini.senza_lavorazioni).toBe(0);
   });
 
-  it('M5. INVARIANTE FR-014c: la somma coincide con il totale dell elenco', async () => {
-    // E' la sola cosa di questa feature che puo' rompersi senza produrre alcun
+  it('M5. INVARIANTE: la somma coincide con il totale dell elenco', async () => {
+    // E' la sola cosa che puo' rompersi senza produrre alcun
     // errore: due numeri diversi in due schermate, e chi guarda non sa quale
     // credere. Regge perche' dashboard ed elenco condividono il predicato.
     await seedRigaRapportino({ giorno: '2026-03-05' });
@@ -1108,7 +1108,7 @@ describe('Metriche: note di lavorazione', () => {
     expect(body.note.numero).toBe(1);
   });
 
-  it('N6. FR-017a: una nota senza data di riferimento e esclusa per SCELTA', async () => {
+  it('N6. una nota senza data di riferimento e esclusa per SCELTA', async () => {
     // In esercizio la colonna e' obbligatoria, ma su SQLite il vincolo non
     // esiste e questo caso e' costruibile. L'esclusione dev'essere una
     // decisione dichiarata — `whereNotNull` esplicito — e non l'effetto

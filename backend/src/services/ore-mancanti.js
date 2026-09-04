@@ -24,7 +24,7 @@ function round2(valore) {
  * Vero per i giorni da lunedì a venerdì.
  *
  * Le festività non sono modellate: il 15 agosto è trattato come un normale
- * giorno feriale (vedi Assumptions della spec).
+ * giorno feriale.
  * @param {Date} data - giorno da valutare
  * @returns {boolean} vero se feriale
  */

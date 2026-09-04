@@ -7,7 +7,7 @@
  * Tutti gli importi sono in € con 2 decimali. Le ore sono un dato registrato,
  * non più una durata calcolata da una fascia oraria: la conversione
  * `ora_inizio`/`ora_fine` → ore decimali è sparita insieme alla fascia oraria
- * stessa (FR-004).
+ * stessa.
  */
 
 const round2 = (value) => Math.round(Number(value) * 100) / 100;

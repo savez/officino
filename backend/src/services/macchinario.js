@@ -4,7 +4,7 @@
  * Il macchinario resta un testo libero per scelta esplicita: nessuna anagrafica.
  * La conseguenza accettata è che due scritture diverse producono due rapportini
  * distinti. L'avviso serve a rendere quella conseguenza visibile prima che si
- * verifichi, non a impedirla (FR-024).
+ * verifichi, non a impedirla.
  */
 
 /**
@@ -17,7 +17,7 @@
  * il caso da intercettare. Senza normalizzazione l'avviso sarebbe decorativo.
  *
  * Il nome resta memorizzato come l'operaio l'ha scritto: questa funzione non va
- * usata per costruire il valore da salvare (FR-024b).
+ * usata per costruire il valore da salvare.
  * @param {string} nome - nome del macchinario come inserito
  * @returns {string} forma normalizzata, adatta al solo confronto
  */
@@ -44,11 +44,11 @@ function stessoMacchinario(a, b) {
  * La restrizione al cliente è essenziale: lo stesso modello di macchina presso
  * due aziende sono due interventi distinti, e segnalarli come duplicati
  * produrrebbe falsi allarmi sistematici. Un avviso che sbaglia spesso viene
- * ignorato anche quando ha ragione (FR-024c).
+ * ignorato anche quando ha ragione.
  *
  * Sono esclusi anche i rapportini di altri operai: due operai sulla stessa
  * macchina hanno per forza due rapportini distinti, quindi non è un duplicato
- * da segnalare (FR-024d).
+ * da segnalare.
  *
  * Il confronto avviene in memoria e non in SQL perché la normalizzazione degli
  * spazi multipli non è esprimibile allo stesso modo su PostgreSQL e su SQLite,

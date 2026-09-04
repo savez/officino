@@ -105,7 +105,7 @@ function risolviScorciatoia(nome, oggi) {
 
 /**
  * Intervallo proposto all'apertura della dashboard, senza che l'utente scelga
- * nulla (FR-004).
+ * nulla.
  * @param {Date} [oggi] - data di riferimento
  * @returns {{da: string, a: string}} intervallo predefinito
  */

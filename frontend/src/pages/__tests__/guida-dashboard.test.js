@@ -13,7 +13,7 @@ const pagina = leggi('../DashboardPage.vue');
 // muove senza l'altra e' la guida a essere sbagliata — ma nessuno se ne accorge
 // finche' qualcuno non va a cercare quello che ha letto.
 //
-// La garanzia e' la stessa introdotta dalla feature 018 (FR-012), e serve
+// La garanzia e' la stessa che vale per le altre sezioni della guida, e serve
 // perche' lo stesso difetto si e' gia' ripresentato: le sezioni Clienti e
 // Preventivi mostrate a chi non poteva aprirle, e lo spazio per la firma
 // promesso da una guida dopo che era stato tolto dal PDF.

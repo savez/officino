@@ -114,7 +114,7 @@ describe('RapportiniPage: coerenza fra template e script', () => {
     expect(sezioni.script).toMatch(/params\.da = periodo\.value\.da/);
   });
 
-  // FR-021: il filtro seleziona i rapportini con almeno una lavorazione nel
+  // Il filtro seleziona i rapportini con almeno una lavorazione nel
   // periodo. Senza la spiegazione a schermo, un rapportino lungo che compare in
   // un mese "sbagliato" si legge come un difetto.
   it('il significato del filtro per periodo è spiegato accanto al filtro', () => {

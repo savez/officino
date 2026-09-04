@@ -61,7 +61,7 @@ function addMateriale(pezzo) {
     )
     emit('update:materiali', updated)
   } else {
-    // US1/FR-011/FR-014: prefill prezzo_unitario from catalogo prezzo_vendita.
+    // Prefill prezzo_unitario from catalogo prezzo_vendita.
     // Snapshot — remains editable per-row, independent from future catalogo edits.
     emit('update:materiali', [
       ...props.materiali,
@@ -80,7 +80,7 @@ function addMateriale(pezzo) {
 
 function addManuale() {
   if (!manualNome.value.trim()) return
-  // US1/FR-012: fuori catalogo accepts a manually entered prezzo_unitario,
+  // Fuori catalogo accepts a manually entered prezzo_unitario,
   // default 0 (admin may complete it later in nota di lavorazione).
   emit('update:materiali', [
     ...props.materiali,

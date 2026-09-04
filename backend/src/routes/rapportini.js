@@ -38,7 +38,7 @@ const rapportinoSchema = z.object({
 // Il tetto di 999,99 non è un giudizio sulla plausibilità: è la capienza della
 // colonna. Respingerlo qui produce un messaggio leggibile invece di un errore
 // del driver. L'avviso sopra le 12 ore vive nell'interfaccia ed è confermabile:
-// il server non blocca nulla in quella fascia (FR-005a).
+// il server non blocca nulla in quella fascia.
 const lavorazioneSchema = z.object({
   giorno: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato giorno non valido (AAAA-MM-GG)'),
   ore: z
@@ -59,7 +59,7 @@ const round2 = (v) => Math.round(Number(v) * 100) / 100;
  * Risolve il costo orario da registrare sulla lavorazione.
  *
  * Solo l'amministratore può imporre un valore; per gli altri quello inviato
- * viene ignorato SENZA errore e si usa la fotografia del profilo (FR-006b).
+ * viene ignorato SENZA errore e si usa la fotografia del profilo.
  * Ignorare in silenzio invece di rifiutare è deliberato: un operaio che invia
  * il campo non sta tentando nulla, sta usando un client che lo include.
  * @param {import('fastify').FastifyInstance} app
@@ -215,7 +215,7 @@ async function rapportiniRoutes(app) {
 
     // "Almeno una lavorazione nell'intervallo, oppure nessuna lavorazione":
     // un rapportino che copre gennaio e marzo compare anche filtrando
-    // febbraio (FR-021), e uno appena creato compare sempre, altrimenti
+    // febbraio, e uno appena creato compare sempre, altrimenti
     // sarebbe irraggiungibile.
     //
     // La condizione vive in `periodo-rapportini.js` perche' la dashboard
@@ -424,7 +424,7 @@ async function rapportiniRoutes(app) {
     }
 
     // L'avviso NON impedisce la creazione: segnala una conseguenza prima
-    // che si verifichi, e la decisione resta all'operaio (FR-024).
+    // che si verifichi, e la decisione resta all'operaio.
     const duplicato = await trovaDuplicatoAperto(app.db, {
       utenteId: request.user.id,
       clienteId: cliente_id,
@@ -582,7 +582,7 @@ async function rapportiniRoutes(app) {
   // ── Transizioni di stato ─────────────────────────────────────────────────
   // Rotte esplicite invece di un PATCH sullo stato: ogni transizione ha la
   // propria verifica lato server e il controllo "solo l'amministratore
-  // riapre" sta in un punto solo (FR-035).
+  // riapre" sta in un punto solo.
   app.post('/:id/chiudi', { preHandler: [app.authenticate] }, async (request, reply) => {
     const caricato = await caricaRapportino(app, request.params.id);
     if (!caricato) return reply.status(404).send({ error: 'Rapportino non trovato' });

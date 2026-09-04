@@ -104,7 +104,7 @@ async function dettaglioNota(id) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-describe('US3 — creazione della nota da rapportini conclusi', () => {
+describe('creazione della nota da rapportini conclusi', () => {
   it('due rapportini conclusi dello stesso cliente entrano nella nota', async () => {
     const a = await seedRapportino({ macchina: 'Trattore JD' });
     const b = await seedRapportino({ macchina: 'Mietitrebbia' });
@@ -158,7 +158,7 @@ describe('US3 — creazione della nota da rapportini conclusi', () => {
   });
 });
 
-describe('US3 — il rapportino incluso risulta gestito', () => {
+describe('il rapportino incluso risulta gestito', () => {
   it('lo stato passa a gestito', async () => {
     const { rapportino } = await seedRapportino();
     await creaNota([rapportino.id]);
@@ -184,7 +184,7 @@ describe('US3 — il rapportino incluso risulta gestito', () => {
   });
 });
 
-describe('US3 — dissociazione: si torna a chiuso, non ad aperto', () => {
+describe('dissociazione: si torna a chiuso, non ad aperto', () => {
   it('rimuovendolo dalla nota il rapportino torna CHIUSO', async () => {
     const a = await seedRapportino({ macchina: 'Trattore JD' });
     const b = await seedRapportino({ macchina: 'Mietitrebbia' });
@@ -238,7 +238,7 @@ describe('US3 — dissociazione: si torna a chiuso, non ad aperto', () => {
   });
 });
 
-describe('US3 — totali e dettaglio', () => {
+describe('totali e dettaglio', () => {
   it('le ore della nota sono la somma delle lavorazioni dei rapportini inclusi', async () => {
     const a = await seedRapportino({ ore: 4, costoOrario: 25, macchina: 'Trattore' });
     await app.db('lavorazioni').insert({
@@ -291,7 +291,7 @@ describe('US3 — totali e dettaglio', () => {
   });
 });
 
-describe('US3 — modifiche ai costi', () => {
+describe('modifiche ai costi', () => {
   it("l'amministratore corregge il costo orario di una lavorazione", async () => {
     const { rapportino, lavorazione } = await seedRapportino({ ore: 4, costoOrario: 25 });
     const res = await creaNota([rapportino.id], {
@@ -322,7 +322,7 @@ describe('US3 — modifiche ai costi', () => {
   });
 });
 
-describe('US3 — avvisi prima della stampa', () => {
+describe('avvisi prima della stampa', () => {
   it('segnala una lavorazione con costo orario a zero', async () => {
     const { rapportino, lavorazione } = await seedRapportino({ costoOrario: 0 });
     const nota = (await creaNota([rapportino.id])).json();
@@ -362,7 +362,7 @@ describe('US3 — avvisi prima della stampa', () => {
   });
 });
 
-describe('US3 — stampa', () => {
+describe('stampa', () => {
   it('produce un PDF', async () => {
     const { rapportino } = await seedRapportino();
     const nota = (await creaNota([rapportino.id])).json();
@@ -388,7 +388,7 @@ describe('US3 — stampa', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-describe('US1 — data di riferimento', () => {
+describe('data di riferimento', () => {
   it('e obbligatoria', async () => {
     const { rapportino } = await seedRapportino();
     const res = await app.inject({
@@ -428,7 +428,7 @@ describe('US1 — data di riferimento', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-describe('US2 — riassunto precompilato', () => {
+describe('riassunto precompilato', () => {
   /**
    * Crea un rapportino con lavorazioni annotate nei giorni indicati.
    * @param {Array<[string, string|null]>} giorniENote - coppie giorno/nota
@@ -527,7 +527,7 @@ describe('US2 — riassunto precompilato', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-describe('US4 — totali imposti e dettagli', () => {
+describe('totali imposti e dettagli', () => {
   it('un dettaglio richiesto sotto il proprio override viene respinto', async () => {
     const { rapportino } = await seedRapportino();
     const res = await creaNota([rapportino.id], {
@@ -614,7 +614,7 @@ describe('US4 — totali imposti e dettagli', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-describe('US4 — soppressione degli avvisi pre-stampa', () => {
+describe('soppressione degli avvisi pre-stampa', () => {
   async function avvisi(notaId) {
     const res = await app.inject({
       method: 'GET',
@@ -666,7 +666,7 @@ describe('US4 — soppressione degli avvisi pre-stampa', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-describe('US5 — unione o divisione per macchinario', () => {
+describe('unione o divisione per macchinario', () => {
   it('la divisione viene conservata sulla nota', async () => {
     const a = await seedRapportino({ macchina: 'Trattore' });
     const b = await seedRapportino({ macchina: 'Mietitrebbia' });

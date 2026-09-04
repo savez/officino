@@ -105,7 +105,7 @@ function puoVedere(rapportino, utente) {
  * È un cambio rispetto al comportamento precedente, in cui l'amministratore
  * modificava le righe di chiunque senza vincolo di stato. Tenere una regola
  * sola invece di un'eccezione per ruolo significa poterla verificare in un
- * punto solo (FR-014, FR-014a, FR-035).
+ * punto solo.
  * @param {Rapportino} rapportino
  * @param {Utente} utente
  * @returns {Esito}
@@ -143,7 +143,7 @@ function verificaModificabile(rapportino, utente) {
 }
 
 /**
- * Regole di eliminazione del rapportino (FR-011a, FR-011b, FR-011c).
+ * Regole di eliminazione del rapportino.
  *
  * L'autore elimina solo un rapportino aperto e vuoto: serve a rimuovere un
  * contenitore creato per errore — un macchinario scritto male, che l'avviso
@@ -176,7 +176,7 @@ function verificaEliminabile(rapportino, utente, numeroLavorazioni) {
 }
 
 /**
- * Verifica la possibilità di dichiarare concluso un rapportino (FR-012, FR-013).
+ * Verifica la possibilità di dichiarare concluso un rapportino.
  *
  * Solo l'autore chiude: un amministratore che volesse farlo starebbe decidendo
  * al posto dell'operaio che il lavoro è finito.
@@ -223,7 +223,7 @@ function verificaChiudibile(rapportino, utente, numeroLavorazioni) {
 }
 
 /**
- * Verifica la possibilità di riaprire un rapportino chiuso (FR-015, FR-016).
+ * Verifica la possibilità di riaprire un rapportino chiuso.
  * @param {Rapportino} rapportino
  * @param {Utente} utente
  * @returns {Esito}
