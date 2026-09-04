@@ -52,4 +52,4 @@ jobs:
       # distinte fra loro (vedi la issue dei difetti noti). Farle girare qui
       # significherebbe un rosso permanente che blocca ogni contributo senza
       # dire nulla di nuovo. Vanno riportate dentro man mano che si sistemano.
-      - run: pnpm test -- --testPathPatterns='tests/unit'
+      - run: pnpm test tests/unit
