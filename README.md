@@ -1,12 +1,19 @@
 # Officino
 
+<p align="center">
+  <img src="docs/banner.svg" alt="Officino — gestionale open source per officine meccaniche" width="100%" />
+</p>
+
+[![CI](https://github.com/savez/officino/actions/workflows/ci.yml/badge.svg)](https://github.com/savez/officino/actions/workflows/ci.yml)
+[![Licenza: MIT](https://img.shields.io/badge/Licenza-MIT-yellow.svg)](LICENSE)
+[![Versione](https://img.shields.io/github/package-json/v/savez/officino)](package.json)
+[![Node 20](https://img.shields.io/badge/Node-20-43853d)](https://nodejs.org)
+[![PostgreSQL 15](https://img.shields.io/badge/PostgreSQL-15-336791)](https://www.postgresql.org)
+[![Vue 3](https://img.shields.io/badge/Vue-3-42b883)](https://vuejs.org)
+[![Fastify](https://img.shields.io/badge/Fastify-5-000000)](https://fastify.dev)
+
 Gestionale per officine meccaniche: si registra il lavoro svolto, se ne misura
 il costo e se ne ricava un documento da consegnare al cliente.
-
-[![Licenza: MIT](https://img.shields.io/badge/Licenza-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![Node 20](https://img.shields.io/badge/Node-20-green)
-![PostgreSQL 15](https://img.shields.io/badge/PostgreSQL-15-blue)
-![Vue 3](https://img.shields.io/badge/Vue-3-brightgreen)
 
 ## Come funziona
 
@@ -55,15 +62,15 @@ rapportini per lo stesso periodo.
 catalogo e fuori catalogo, manodopera e sconto, ciclo bozza → approvato →
 fatturato, PDF con il logo dell'officina.
 
-**Magazzino e catalogo** — due sezioni distinte: le giacenze da una parte, il
-catalogo dei ricambi dall'altra, con categorie, ricerca, lettura di codici a
-barre (EAN-13 e QR) ed export Excel.
+**Catalogo prodotti** — i ricambi e i materiali, con categorie, ricerca,
+lettura di codici a barre (EAN-13 e QR) ed export Excel. Il catalogo alimenta i
+preventivi e i materiali dei rapportini, e accetta anche voci fuori catalogo
+inserite a mano.
 
 **Clienti, utenti e permessi** — due ruoli, `user` e `admin`. Sono riservate
 agli admin cinque sezioni: clienti, note di lavorazione, utenti, impostazioni e
 registro modifiche. Dashboard, rapportini, preventivi e catalogo restano
-accessibili a tutti, e ogni operaio vede e modifica i propri rapportini. Ogni
-modifica finisce in un registro consultabile.
+accessibili a tutti, e ogni operaio vede e modifica i propri rapportini.
 
 **Guida integrata** — descritta nell'applicazione e allineata ai permessi di chi
 la legge. Alcuni test verificano proprio questo: che la guida descriva il
@@ -155,16 +162,22 @@ make test              # entrambe le suite
 Il backend gira su SQLite in memoria, quindi i test non richiedono un database
 attivo. Il frontend usa Vitest con jsdom.
 
-> **Nota onesta sullo stato attuale:** sei suite di integrazione del backend
-> falliscono. Cercano la tabella `pezzi_magazzino`, rinominata in `catalogo` da
-> una migrazione, e non sono mai state aggiornate. Ci sono anche due errori di
-> lint in `backend/src/services/log-modifiche.js`. Sono problemi noti e
-> circoscritti, non toccano il codice in esercizio, e sono un buon punto di
-> partenza per un primo contributo.
+> **Stato attuale, detto com'è:** la CI esegue il frontend per intero e, del
+> backend, lint e test unitari. I test di integrazione restano fuori perché sei
+> suite falliscono, per quattro motivi distinti e tutti preesistenti. Sono
+> elencati nella issue dei difetti noti, e sono il punto di partenza più utile
+> per un primo contributo.
 
 ## Contribuire
 
-Le pull request sono benvenute. Il progetto usa
+Le pull request sono benvenute — [CONTRIBUTING.md](CONTRIBUTING.md) spiega
+ambiente di sviluppo, convenzioni e cosa succede alla tua PR. Vale anche il
+[codice di condotta](CODE_OF_CONDUCT.md).
+
+Per una vulnerabilità di sicurezza **non aprire una issue**: la procedura sta in
+[SECURITY.md](SECURITY.md).
+
+Il progetto usa
 [Conventional Commits](https://www.conventionalcommits.org/) — `feat:`, `fix:`,
 `docs:`, `refactor:`, `test:`, `chore:` — perché la versione la calcola
 semantic-release dai messaggi di commit.

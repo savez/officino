@@ -49,7 +49,7 @@ test-frontend:
 	cd frontend && pnpm test
 
 test-unit:
-	cd backend && pnpm test -- --testPathPattern='tests/unit'
+	cd backend && pnpm test tests/unit
 
 lint:
 	cd backend && pnpm lint && cd ../frontend && pnpm lint

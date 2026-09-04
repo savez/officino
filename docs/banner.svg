@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 360" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="t d">
+  <title id="t">Officino</title>
+  <desc id="d">Gestionale open source per officine meccaniche: rapportini per macchinario, note di lavorazione e misura del lavoro svolto</desc>
+
+  <defs>
+    <!-- Angoli vivi ovunque: il sistema di stile del progetto li vuole cosi',
+         perche' una targhetta d'officina non ha angoli arrotondati. -->
+    <linearGradient id="fondo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0e3a2b"/>
+      <stop offset="60%" stop-color="#14503c"/>
+      <stop offset="100%" stop-color="#1c6b50"/>
+    </linearGradient>
+    <pattern id="griglia" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1280" height="360" fill="url(#fondo)"/>
+  <rect width="1280" height="360" fill="url(#griglia)"/>
+
+  <!-- Filo arancio in alto: il colore di marchio -->
+  <rect width="1280" height="8" fill="#f97316"/>
+
+  <!-- Targhetta con la chiave inglese, la stessa forma della favicon -->
+  <g transform="translate(96 116)">
+    <rect width="128" height="128" fill="#f97316"/>
+    <g transform="translate(24 24) scale(3.333)">
+      <path fill="#ffffff" d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/>
+    </g>
+  </g>
+
+  <g font-family="'Barlow Condensed','Arial Narrow','Helvetica Neue',Helvetica,sans-serif">
+    <text x="272" y="176" fill="#ffffff" font-size="92" font-weight="700" letter-spacing="2">OFFICINO</text>
+    <text x="274" y="222" fill="#c9d8cf" font-size="30" font-weight="400" letter-spacing="1.2">
+      Gestionale open source per officine meccaniche
+    </text>
+  </g>
+
+  <!-- Tre stati del rapportino: e' il concetto centrale del dominio -->
+  <g font-family="'Barlow','Helvetica Neue',Helvetica,sans-serif" font-size="19" font-weight="600" letter-spacing="1.6">
+    <g transform="translate(274 264)">
+      <rect width="8" height="34" fill="#8a5209"/>
+      <text x="22" y="24" fill="#e7ded1">APERTO</text>
+    </g>
+    <g transform="translate(430 264)">
+      <rect width="8" height="34" fill="#7fd1ae"/>
+      <text x="22" y="24" fill="#e7ded1">CHIUSO</text>
+    </g>
+    <g transform="translate(586 264)">
+      <rect width="8" height="34" fill="#9fb6cc"/>
+      <text x="22" y="24" fill="#e7ded1">IN NOTA</text>
+    </g>
+  </g>
+
+  <!-- Il numerale delle ore, l'elemento piu' riconoscibile dell'interfaccia -->
+  <g transform="translate(980 96)">
+    <rect width="216" height="168" fill="#ffffff" fill-opacity="0.06"/>
+    <rect width="216" height="4" fill="#f97316"/>
+    <text x="108" y="104" fill="#ffffff" text-anchor="middle"
+          font-family="'Barlow Condensed','Arial Narrow',sans-serif" font-size="82" font-weight="700">12,5</text>
+    <text x="108" y="140" fill="#c9d8cf" text-anchor="middle"
+          font-family="'Barlow','Helvetica Neue',sans-serif" font-size="19" font-weight="600" letter-spacing="2">ORE</text>
+  </g>
+</svg>

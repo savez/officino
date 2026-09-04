@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Setup, comandi e deploy
+    url: https://github.com/savez/officino#readme
+    about: Installazione locale, comandi, distribuzione
+  - name: Come contribuire
+    url: https://github.com/savez/officino/blob/main/CONTRIBUTING.md
+    about: Ambiente di sviluppo, convenzioni, cosa succede alla tua PR
+  - name: Vulnerabilità di sicurezza
+    url: https://github.com/savez/officino/security/advisories/new
+    about: Non aprire una issue pubblica — usa un advisory privato

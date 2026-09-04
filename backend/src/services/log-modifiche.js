@@ -15,21 +15,15 @@
  * @param {object} [params.dettaglio] - Optional details (before/after values, etc.)
  * @returns {Promise<void>}
  */
+// eslint-disable-next-line no-unused-vars
 async function logModifica(db, { utente_id, entita, entita_id, azione, dettaglio = null }) {
-  // LOG MANAGEMENT DISABLED — logging always off
-  return;
-
-  if (!logAttivi) {
-    return;
-  }
-
-  await db('log_modifiche').insert({
-    utente_id,
-    entita,
-    entita_id,
-    azione,
-    dettaglio: dettaglio ? JSON.stringify(dettaglio) : null,
-  });
+  // REGISTRO DISATTIVATO — non viene scritta alcuna riga.
+  //
+  // La firma resta perche' otto file di rotte la invocano: toglierla vorrebbe
+  // dire toccarli tutti per riaggiungerla quando il registro torna attivo.
+  // Il corpo che leggeva `impostazioni_officina.log_attivi` e inseriva in
+  // `log_modifiche` e' stato rimosso: stava dopo questo return, quindi non
+  // poteva eseguire, e faceva fallire il lint su una variabile inesistente.
 }
 
 /**

@@ -1,0 +1,8 @@
+# better-sqlite3 e bcrypt compilano un modulo nativo in fase di post-install.
+# Senza questa approvazione esplicita pnpm 10+ salta lo script, e il modulo
+# resta senza binding: i test falliscono con "Could not locate the bindings
+# file" e bcrypt non riesce a cifrare le password.
+allowBuilds:
+  better-sqlite3: true
+  bcrypt: true
+  unrs-resolver: true

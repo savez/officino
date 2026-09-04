@@ -1,32 +1,25 @@
 const { computeDiff, logModifica } = require('../../src/services/log-modifiche');
 
 describe('logModifica', () => {
-  it('should not insert log when log_attivi is false', async () => {
-    const impostazioniQuery = {
-      select: jest.fn().mockReturnThis(),
-      first: jest.fn().mockResolvedValue({ log_attivi: false }),
-    };
-
-    const logQuery = {
-      insert: jest.fn().mockResolvedValue(undefined),
-    };
-
-    const db = jest.fn((table) => {
-      if (table === 'impostazioni_officina') return impostazioniQuery;
-      if (table === 'log_modifiche') return logQuery;
-      throw new Error(`Unexpected table: ${table}`);
+  // Il registro e' disattivato: la funzione non deve scrivere nulla, e non deve
+  // nemmeno interrogare il database. Il test verifica il contratto — nessuna
+  // riga scritta — non il modo in cui ci si arriva.
+  it('non scrive nulla e non tocca il database', async () => {
+    const db = jest.fn(() => {
+      throw new Error('il registro e\' disattivato: nessuna query attesa');
     });
 
-    await logModifica(db, {
-      utente_id: 1,
-      entita: 'cliente',
-      entita_id: 10,
-      azione: 'modifica',
-      dettaglio: { nome: { prima: 'A', dopo: 'B' } },
-    });
+    await expect(
+      logModifica(db, {
+        utente_id: 1,
+        entita: 'cliente',
+        entita_id: 10,
+        azione: 'modifica',
+        dettaglio: { nome: { prima: 'A', dopo: 'B' } },
+      }),
+    ).resolves.toBeUndefined();
 
-    expect(impostazioniQuery.select).toHaveBeenCalledWith('log_attivi');
-    expect(logQuery.insert).not.toHaveBeenCalled();
+    expect(db).not.toHaveBeenCalled();
   });
 });
 
