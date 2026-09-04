@@ -2,6 +2,7 @@
   "branches": [
     "main"
   ],
+  "tagFormat": "${version}",
   "preset": "conventionalcommits",
   "plugins": [
     [
