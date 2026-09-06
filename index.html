@@ -175,7 +175,7 @@ h3{font-size:1.3rem;line-height:1.15;text-transform:uppercase;letter-spacing:.04
   min-height:var(--tocco);padding:0 1.4rem;
   font-family:var(--testo);font-size:1rem;font-weight:600;letter-spacing:.02em;
   text-decoration:none;cursor:pointer;border:1px solid transparent;
-  transition:background 160ms ease,color 160ms ease,border-color 160ms ease;
+  transition:background 160ms ease,color 160ms ease,border-color 160ms ease,box-shadow 160ms ease;
 }
 .bottone--pieno{background:#fff;color:var(--abete)}
 .bottone--pieno:hover{background:var(--testo-scuro)}
@@ -391,6 +391,31 @@ code{font-family:var(--dati);font-size:.875em;letter-spacing:0}
   font-size:var(--etichetta);font-weight:600;letter-spacing:.1em;text-transform:uppercase;
   color:var(--tenue);
 }
+
+/* ── L'offerta ───────────────────────────────────────────────────────────────
+   Una targhetta con la stessa cimasa arancio di quella dell'eroe. È una rima
+   voluta: là la placca è il prodotto, qui è chi l'ha scritto. L'arancione è il
+   colore dell'insegna, e questa è la sezione in cui parla l'officina — l'unico
+   punto della pagina in cui portarlo su una superficie ha un senso.
+
+   Il filo arancio NON fa da confine: contro carta sta a 2,61:1, sotto i 3:1 che
+   servono a un bordo che porta significato. Il confine lo fa `filo`, e la
+   cimasa è rinforzo su un cambio di fondo già visibile.
+
+   Sul bottone il testo è `inchiostro`, non bianco: bianco su #f97316 sta a
+   2,80:1 e non si legge. Inchiostro sta a 5,91:1.
+   ─────────────────────────────────────────────────────────────────────────── */
+.offerta{
+  background:var(--superficie);border:1px solid var(--filo);
+  border-top:4px solid var(--marchio);
+  padding:clamp(1.75rem,4vw,2.75rem);max-width:60ch;
+}
+.offerta h2{max-width:18ch}
+.offerta .prosa{margin:1.15rem 0 1.9rem}
+.bottone--marchio{background:var(--marchio);color:var(--inchiostro)}
+/* All'hover non cambia tinta ma compare un bordo inciso: nessun colore in piu',
+   e il gesto e' quello di una targhetta che viene premuta. */
+.bottone--marchio:hover{box-shadow:inset 0 0 0 2px var(--inchiostro)}
 
 /* ── Piede ──────────────────────────────────────────────────────────────── */
 .piede{background:var(--abete);color:#fff;padding:clamp(2.5rem,6vw,3.5rem) 0}
@@ -739,6 +764,24 @@ make dev-frontend             <span class="cmt"># interfaccia su :5173</span></p
         una vulnerabilità di sicurezza non aprire una issue &mdash; la procedura sta in
         <a href="https://github.com/savez/officino/blob/main/SECURITY.md">SECURITY.md</a>.
       </p>
+    </div>
+  </section>
+
+  <!-- ═══ L'offerta: dopo aver chiesto codice, si chiede una birra ═══ -->
+  <section class="sezione" id="offrimi">
+    <div class="colonna">
+      <div class="offerta">
+        <p class="occhiello">Progetto indipendente</p>
+        <h2>Offrimi una birra.</h2>
+        <p class="prosa">
+          Officino è gratis, open source e senza tracciamento, scritto nel tempo
+          libero. Se non ti va di aprire una pull request ma ti è servito,
+          offrimi una birra.
+        </p>
+        <a class="bottone bottone--marchio" href="https://buymeacoffee.com/goeokwihgz" rel="noopener">
+          Offrimi una birra &#8599;
+        </a>
+      </div>
     </div>
   </section>
 
