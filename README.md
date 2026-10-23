@@ -10,7 +10,7 @@
 [![CI](https://github.com/savez/officino/actions/workflows/ci.yml/badge.svg)](https://github.com/savez/officino/actions/workflows/ci.yml)
 [![Licenza: MIT](https://img.shields.io/badge/Licenza-MIT-yellow.svg)](LICENSE)
 [![Versione](https://img.shields.io/github/package-json/v/savez/officino)](package.json)
-[![Node 20](https://img.shields.io/badge/Node-20-43853d)](https://nodejs.org)
+[![Node 24](https://img.shields.io/badge/Node-24-43853d)](https://nodejs.org)
 [![PostgreSQL 15](https://img.shields.io/badge/PostgreSQL-15-336791)](https://www.postgresql.org)
 [![Vue 3](https://img.shields.io/badge/Vue-3-42b883)](https://vuejs.org)
 [![Fastify](https://img.shields.io/badge/Fastify-5-000000)](https://fastify.dev)
@@ -82,7 +82,7 @@ vede subito.
 
 ## Avvio rapido
 
-Serve Node 20+, pnpm e PostgreSQL 15+ (Docker è comodo ma non obbligatorio).
+Serve Node 24+, pnpm e PostgreSQL 15+ (Docker è comodo ma non obbligatorio).
 
 ```bash
 git clone https://github.com/savez/officino.git
