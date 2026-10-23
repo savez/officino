@@ -36,9 +36,8 @@ jobs:
           # semantic-release 25 richiede Node >= 22.14: con la 20 fallisce
           # all'avvio, senza pubblicare la release ne' aggiornare il CHANGELOG.
           #
-          # E' la versione con cui gira lo strumento di rilascio, non quella
-          # dell'applicazione: il backend resta su Node 20 (vedi i Dockerfile).
-          node-version: '22'
+          # Stessa versione dell'applicazione (Dockerfile e CI): Node 24 LTS.
+          node-version: '24'
           cache: 'pnpm'
 
       - name: Install root dependencies

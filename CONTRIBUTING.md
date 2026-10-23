@@ -9,7 +9,7 @@ circoscritti e già diagnosticati.
 
 ## Ambiente di sviluppo
 
-Serve **Node 20**, **pnpm 10** e **PostgreSQL 15** — oppure Docker, se preferisci
+Serve **Node 24**, **pnpm 10** e **PostgreSQL 15** — oppure Docker, se preferisci
 non installare Postgres.
 
 ```bash
